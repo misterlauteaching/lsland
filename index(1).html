@@ -1,0 +1,1306 @@
+<!-- ... existing code ... -->
+</head>
+<body class="min-h-screen flex flex-col selection:bg-amber-500 selection:text-slate-950">
+
+  <!-- ==========================================
+       DEDICATED FULL-SCREEN ENTRY LOGIN GATE
+       (Separate Role Selection -> Separate Student / Teacher Pages)
+       ========================================== -->
+  <div id="entryLoginScreen" class="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center p-4 overflow-y-auto" style="background: radial-gradient(circle at top, #2e1b46 0%, #0b0d14 100%);">
+    <!-- Top Cloud Status Pill on Login Gate -->
+    <div class="w-full max-w-md mb-4 flex items-center justify-between bg-slate-900/90 border border-amber-500/30 rounded-xl px-3.5 py-2 shadow-lg">
+      <div class="flex items-center gap-2 text-xs">
+        <span id="gateCloudDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span id="gateCloudText" class="font-semibold text-slate-200">Cloud Sync Ready</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <button id="btnGateRefreshCloud" type="button" class="px-2.5 py-1 rounded-lg bg-sky-600/80 hover:bg-sky-500 text-white font-bold text-[11px] transition">
+          🔄 Sync Roster
+        </button>
+        <button id="btnGateOpenCloudSetup" type="button" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] border border-slate-700">
+          ⚙️ Cloud
+        </button>
+      </div>
+    </div>
+
+    <!-- VIEW 1: ROLE CHOOSER PAGE (STUDENT OR TEACHER) -->
+    <div id="loginViewRoleSelect" class="w-full max-w-md bg-slate-900/95 border-2 border-amber-500/50 rounded-2xl p-6 text-center space-y-5 shadow-2xl">
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-amber-500 to-orange-700 flex items-center justify-center shadow-xl border-2 border-amber-200">
+        <span class="text-3xl">👑</span>
+      </div>
+      <div>
+        <h1 class="font-medieval text-2xl sm:text-3xl font-extrabold text-amber-400 tracking-wide">Chronicles of the LS Land</h1>
+        <p class="text-xs sm:text-sm text-slate-300 mt-1">Classroom Medieval RPG • Choose Your Portal to Enter</p>
+      </div>
+
+      <div class="grid grid-cols-1 gap-3.5 pt-2">
+        <button id="btnChooseStudentRole" type="button" class="p-4 rounded-2xl bg-gradient-to-r from-amber-500/20 via-slate-950 to-amber-500/20 hover:from-amber-500/30 hover:to-amber-500/30 border-2 border-amber-400/70 text-left transition flex items-center gap-4 group shadow-lg">
+          <div class="w-12 h-12 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center text-2xl font-extrabold shrink-0 shadow">
+            🛡️
+          </div>
+          <div class="flex-1">
+            <div class="font-medieval text-base font-extrabold text-amber-300 group-hover:text-amber-200">Enter as Student Hero</div>
+            <p class="text-xs text-slate-300 mt-0.5">Log in with your personal 4-digit Student PIN to conquer dungeons, customize gear, and train.</p>
+          </div>
+          <span class="text-amber-400 font-extrabold text-lg">➔</span>
+        </button>
+
+        <button id="btnChooseTeacherRole" type="button" class="p-4 rounded-2xl bg-gradient-to-r from-purple-600/20 via-slate-950 to-indigo-600/20 hover:from-purple-600/30 hover:to-indigo-600/30 border-2 border-purple-400/70 text-left transition flex items-center gap-4 group shadow-lg">
+          <div class="w-12 h-12 rounded-xl bg-purple-600 text-white flex items-center justify-center text-2xl font-extrabold shrink-0 shadow">
+            🎓
+          </div>
+          <div class="flex-1">
+            <div class="font-medieval text-base font-extrabold text-purple-300 group-hover:text-purple-200">Enter as Teacher Admin</div>
+            <p class="text-xs text-slate-300 mt-0.5">Unlock the Classroom Command Center to create students, award CP/Gold, and grant Social Class promotions.</p>
+          </div>
+          <span class="text-purple-400 font-extrabold text-lg">➔</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- VIEW 2: DEDICATED STUDENT LOGIN PAGE -->
+    <div id="loginViewStudentPage" class="hidden w-full max-w-md bg-slate-900/95 border-2 border-amber-500/60 rounded-2xl p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-2xl">🛡️</span>
+          <div>
+            <h2 class="font-medieval text-lg font-extrabold text-amber-300">Student Hero Login</h2>
+            <p class="text-[11px] text-slate-400">Select your hero and enter your 4-digit PIN</p>
+          </div>
+        </div>
+        <button id="btnBackFromStudentLogin" type="button" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 border border-slate-700">
+          ⬅️ Back
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-300 font-bold mb-1">1. Choose Your Hero Profile</label>
+          <select id="gateStudentSelect" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white font-bold focus:outline-none focus:border-amber-400"></select>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-bold mb-1">2. Enter Your 4-Digit Student Code</label>
+          <input id="gateStudentPinInput" type="password" maxlength="4" placeholder="••••" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-center text-lg font-mono tracking-widest text-amber-300 focus:outline-none focus:border-amber-400" />
+          <p id="gateStudentError" class="hidden text-xs text-rose-400 font-bold mt-1.5 text-center">❌ Incorrect 4-digit PIN! Ask your teacher if you forgot your code.</p>
+        </div>
+
+        <button id="btnGateStudentLoginSubmit" type="button" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold text-sm shadow-lg transition">
+          🔓 Enter the Kingdom as Student
+        </button>
+      </div>
+    </div>
+
+    <!-- VIEW 3: DEDICATED TEACHER LOGIN PAGE -->
+    <div id="loginViewTeacherPage" class="hidden w-full max-w-md bg-slate-900/95 border-2 border-purple-500/60 rounded-2xl p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-2xl">🎓</span>
+          <div>
+            <h2 class="font-medieval text-lg font-extrabold text-purple-300">Teacher Admin Login</h2>
+            <p class="text-[11px] text-slate-400">Protected Classroom Control Center</p>
+          </div>
+        </div>
+        <button id="btnBackFromTeacherLogin" type="button" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 border border-slate-700">
+          ⬅️ Back
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-300 font-bold mb-1">Enter Teacher Master PIN</label>
+          <input id="gateTeacherPinInput" type="password" placeholder="Enter Teacher PIN" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-center text-base font-mono text-purple-300 focus:outline-none focus:border-purple-400" />
+          <p id="gateTeacherError" class="hidden text-xs text-rose-400 font-bold mt-1.5 text-center">❌ Incorrect Teacher PIN!</p>
+        </div>
+
+        <button id="btnGateTeacherLoginSubmit" type="button" class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-sm shadow-lg transition">
+          🔓 Unlock Teacher Command Center
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP HEADER BAR -->
+  <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-amber-500/30 px-3 py-2 shadow-lg">
+<!-- ... existing code ... -->
+        <!-- Sound Toggle -->
+        <button id="btnToggleSound" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition" title="Toggle Sound Effects">
+          🔊 SFX
+        </button>
+
+        <!-- Account Login & Student PIN Settings -->
+        <button id="btnOpenAccountModal" type="button" class="px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-xs font-extrabold text-slate-950 border border-amber-300 transition flex items-center gap-1 shadow">
+          <span>🔑</span> <span id="headerLoginBtnText">Account</span>
+        </button>
+
+        <!-- Switch Role / Return to Login Gate -->
+        <button id="btnReturnToLoginGate" type="button" class="px-2.5 py-1.5 rounded-lg bg-rose-900/80 hover:bg-rose-800 text-xs font-bold text-rose-200 border border-rose-500/40 transition flex items-center gap-1" title="Log Out to Role Selection">
+          <span>🚪</span> <span class="hidden sm:inline">Switch Role</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Combat / Dungeon Resume Banner (Seamless Mid-Fight Switching) -->
+<!-- ... existing code ... -->
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="font-medieval text-lg font-bold text-amber-300">🛡️ Hero Paper-Doll & Loadout</h2>
+                <p class="text-xs text-slate-400">Equipped items & active traits change your character's look and apply immediately—even mid-fight!</p>
+              </div>
+              <button id="btnToggleCustomizeHero" type="button" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-200 text-xs font-bold transition">
+                🎨 Customize Look (<span id="btnCustomizeCostBadge">10</span> 🪙)
+              </button>
+            </div>
+
+            <!-- Character Customizer Drawer (Progressive Gold Cost) -->
+            <div id="heroCustomizerDrawer" class="hidden bg-slate-950/95 border border-amber-500/40 rounded-xl p-3.5 space-y-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400">✨ Royal Stylist • Customize Hero Appearance</h3>
+                  <p class="text-[11px] text-slate-400">Progressive Styling Fee: 1st = 10 🪙, 2nd = 150 🪙, 3rd = 750 🪙, 4th = 3,750 🪙...</p>
+                </div>
+                <button id="btnCloseCustomizeHero" type="button" class="text-xs text-slate-400 hover:text-white">Cancel ✕</button>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
+                <div>
+                  <label class="block text-slate-400 mb-1">Gender</label>
+                  <select id="custGender" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-white">
+                    <option value="male">Male Hero</option>
+                    <option value="female">Female Heroine</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-slate-400 mb-1">Skin Tone</label>
+                  <select id="custSkin" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-white">
+                    <option value="#fde68a">Fair Ivory</option>
+                    <option value="#f5cba7">Warm Peach</option>
+                    <option value="#e59866">Sunlit Bronze</option>
+                    <option value="#ca6f1e">Golden Tan</option>
+                    <option value="#873600">Rich Umber</option>
+                    <option value="#5c2c16">Deep Espresso</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-slate-400 mb-1">Hair Style</label>
+                  <select id="custHairStyle" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-white">
+                    <option value="0">Royal Vanguard</option>
+                    <option value="1">Spiky Battlemage</option>
+                    <option value="2">Long Flowing Locks</option>
+                    <option value="3">Knightly Ponytail</option>
+                    <option value="4">Twin Braids / Crest</option>
+                    <option value="5">Monastic Buzz / Bob</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-slate-400 mb-1">Hair Color</label>
+                  <select id="custHairColor" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-white">
+                    <option value="#1f2937">Raven Black</option>
+                    <option value="#78350f">Chestnut Brown</option>
+                    <option value="#fbbf24">Golden Blonde</option>
+                    <option value="#dc2626">Crimson Flame</option>
+                    <option value="#38bdf8">Arcane Azure</option>
+                    <option value="#e879f9">Mystic Violet</option>
+                    <option value="#e5e7eb">Silver Elder</option>
+                    <option value="#10b981">Emerald Forest</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-slate-400 mb-1">Eye Expression</label>
+                  <select id="custEyeStyle" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-white">
+                    <option value="determined">Determined Hero</option>
+                    <option value="cheerful">Cheerful Adventurer</option>
+                    <option value="fierce">Fierce Warrior</option>
+                    <option value="wise">Wise Scholar</option>
+                    <option value="mystic">Glowing Arcane</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-slate-400 mb-1">Facial Feature</label>
+                  <select id="custFacialFeature" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-white">
+                    <option value="none">Clean Face</option>
+                    <option value="freckles">Youthful Freckles</option>
+                    <option value="scar">Valiant Cheek Scar</option>
+                    <option value="blush">Rosy Cheeks</option>
+                    <option value="beard">Noble Beard / Tiara</option>
+                    <option value="rune">Starlight Rune Mark</option>
+                  </select>
+                </div>
+              </div>
+              <div class="flex items-center justify-between pt-2 border-t border-slate-800">
+                <div class="text-xs text-slate-300">
+                  Changes Made: <strong id="custChangesCountText" class="text-amber-300">0</strong> • Next Cost: <strong id="custNextCostText" class="text-amber-400">10 🪙</strong>
+                </div>
+                <button id="btnConfirmApplyAppearance" type="button" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold text-xs shadow-lg transition">
+                  ✨ Pay & Apply Look (<span id="btnApplyLookCostNum">10</span> 🪙)
+                </button>
+              </div>
+            </div>
+
+            <!-- Paper-Doll 6-Slot Visual Grid + Center Avatar -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 items-center">
+              <!-- Left Slots: Weapon, Chestplate, Shield -->
+              <div class="space-y-2.5" id="paperDollLeftSlots"></div>
+
+              <!-- Center Hero Avatar & Total Power -->
+              <div class="flex flex-col items-center justify-center bg-slate-950/90 border border-slate-800 rounded-2xl p-3 text-center">
+                <div id="inventoryPaperDollAvatar" class="w-36 h-40 flex items-center justify-center"></div>
+                <div class="mt-2 text-xs font-bold text-amber-300" id="paperDollClassTitle">Outcast (1.0x)</div>
+                <div class="text-[11px] text-slate-400">Gear Power: <strong id="paperDollGearPower" class="text-white">120</strong></div>
+                <button id="btnRepairAllQuick" type="button" class="mt-2 w-full px-2 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-[11px] font-bold text-amber-300 transition">
+                  🔧 Repair Equipped
+                </button>
+              </div>
+
+              <!-- Right Slots: Helmet, Gauntlets/Boots, Accessory -->
+              <div class="space-y-2.5" id="paperDollRightSlots"></div>
+            </div>
+<!-- ... existing code ... -->
+    const GEAR_SLOTS = ["Weapon", "Helmet", "Chestplate", "Gauntlets/Boots", "Shield", "Accessory"];
+
+    const GEAR_SUBTYPES = {
+      "Weapon": [
+        { name: "Shadow Dagger", style: "dagger", icon: "🗡️", atk: 12, def: 1, hp: 5, mp: 4 },
+        { name: "Knightly Broadsword", style: "sword", icon: "⚔️", atk: 15, def: 3, hp: 10, mp: 2 },
+        { name: "Royal Halberd", style: "halberd", icon: "🪓", atk: 18, def: 2, hp: 8, mp: 0 },
+        { name: "Archmage Runed Staff", style: "staff", icon: "🦯", atk: 10, def: 2, hp: 8, mp: 14 },
+        { name: "Crusader War Mace", style: "mace", icon: "🔨", atk: 14, def: 4, hp: 14, mp: 4 }
+      ],
+      "Helmet": [
+        { name: "Cloth Scholar Hood", style: "hood", icon: "🧢", atk: 1, def: 5, hp: 15, mp: 10 },
+        { name: "Ranger Leather Cap", style: "cap", icon: "🪖", atk: 3, def: 7, hp: 20, mp: 4 },
+        { name: "Ironclad Greathelm", style: "greathelm", icon: "⛑️", atk: 2, def: 11, hp: 30, mp: 0 },
+        { name: "Arcane Star Circlet", style: "circlet", icon: "👑", atk: 4, def: 6, hp: 18, mp: 14 }
+      ],
+      "Chestplate": [
+        { name: "Mystic Cloth Robes", style: "robe", icon: "👘", atk: 2, def: 8, hp: 25, mp: 15 },
+        { name: "Studded Brigandine", style: "brigandine", icon: "🦺", atk: 4, def: 13, hp: 38, mp: 5 },
+        { name: "Templar Plate Mail", style: "plate", icon: "🥋", atk: 3, def: 18, hp: 52, mp: 2 },
+        { name: "Dragonscale Cuirass", style: "cuirass", icon: "🛡️", atk: 6, def: 20, hp: 60, mp: 8 }
+      ],
+      "Gauntlets/Boots": [
+        { name: "Swift Leather Greaves", style: "greaves", icon: "🥾", atk: 3, def: 6, hp: 18, mp: 4 },
+        { name: "Iron Sabatons", style: "sabatons", icon: "🦿", atk: 2, def: 10, hp: 26, mp: 0 },
+        { name: "Vanguard War Gauntlets", style: "gauntlets", icon: "🧤", atk: 6, def: 8, hp: 22, mp: 3 },
+        { name: "Winged Strider Boots", style: "wingedboots", icon: "👟", atk: 4, def: 7, hp: 20, mp: 9 }
+      ],
+      "Shield": [
+        { name: "Oaken Buckler", style: "buckler", icon: "🪵", atk: 1, def: 8, hp: 20, mp: 2 },
+        { name: "Royal Heater Shield", style: "heater", icon: "🛡️", atk: 2, def: 13, hp: 34, mp: 3 },
+        { name: "Fortress Tower Pavise", style: "pavise", icon: "🧱", atk: 0, def: 18, hp: 48, mp: 0 },
+        { name: "Aegis Runed Ward", style: "aegis", icon: "💠", atk: 3, def: 14, hp: 32, mp: 12 }
+      ],
+      "Accessory": [
+        { name: "Signet Ring of Valor", style: "ring", icon: "💍", atk: 6, def: 4, hp: 18, mp: 6 },
+        { name: "LS Scholar Amulet", style: "amulet", icon: "📿", atk: 4, def: 5, hp: 22, mp: 14 },
+        { name: "Chrono Sun Talisman", style: "talisman", icon: "🏅", atk: 8, def: 6, hp: 28, mp: 10 },
+        { name: "Sovereign Emerald Brooch", style: "brooch", icon: "💎", atk: 7, def: 7, hp: 35, mp: 12 }
+      ]
+    };
+<!-- ... existing code ... -->
+    const SHOP_EXCLUSIVE_ITEMS = [
+      // Affordable Higher-Level Common Gears (Strict Rarity Hierarchy: Common < Rare < Exotic < Legendary)
+      { id: "shop_c_w1", name: "High-Carbon Steel Broadsword (Lv. 5+)", slot: "Weapon", style: "sword", icon: "⚔️", rarity: "Common", atk: 24, def: 5, hp: 28, mp: 6, traits: [], priceGold: 180, priceCP: 8 },
+      { id: "shop_c_h1", name: "Reinforced Garrison Helm (Lv. 5+)", slot: "Helmet", style: "greathelm", icon: "🪖", rarity: "Common", atk: 5, def: 14, hp: 45, mp: 8, traits: [], priceGold: 160, priceCP: 7 },
+      { id: "shop_c_c1", name: "Heavy Infantry Hauberk (Lv. 6+)", slot: "Chestplate", style: "brigandine", icon: "🦺", rarity: "Common", atk: 6, def: 24, hp: 75, mp: 10, traits: [], priceGold: 220, priceCP: 10 },
+      { id: "shop_c_b1", name: "Marching Iron Greaves (Lv. 6+)", slot: "Gauntlets/Boots", style: "sabatons", icon: "🥾", rarity: "Common", atk: 8, def: 16, hp: 42, mp: 6, traits: [], priceGold: 175, priceCP: 8 },
+      { id: "shop_c_s1", name: "Watchtower Iron Shield (Lv. 7+)", slot: "Shield", style: "heater", icon: "🛡️", rarity: "Common", atk: 4, def: 22, hp: 64, mp: 5, traits: [], priceGold: 210, priceCP: 9 },
+      { id: "shop_c_a1", name: "Guild Journeyman Signet (Lv. 8+)", slot: "Accessory", style: "ring", icon: "💍", rarity: "Common", atk: 14, def: 10, hp: 48, mp: 18, traits: [], priceGold: 240, priceCP: 11 },
+      { id: "shop_c_w2", name: "Veteran's Damascus Halberd (Lv. 15+)", slot: "Weapon", style: "halberd", icon: "🪓", rarity: "Common", atk: 38, def: 9, hp: 52, mp: 10, traits: [], priceGold: 520, priceCP: 22 },
+      { id: "shop_c_c2", name: "Citadel Footman Cuirass (Lv. 15+)", slot: "Chestplate", style: "plate", icon: "🥋", rarity: "Common", atk: 10, def: 34, hp: 115, mp: 14, traits: [], priceGold: 580, priceCP: 25 },
+      // Mid-Tier Rare Shop Gears (Strictly stronger than Common)
+      { id: "shop_w1", name: "LS Scholar's Sunblade", slot: "Weapon", style: "sword", icon: "⚔️", rarity: "Rare", atk: 64, def: 18, hp: 110, mp: 28, traits: ["Critical Eye"], priceGold: 1250, priceCP: 48 },
+      { id: "shop_b1", name: "Vanguard Knight Greaves", slot: "Gauntlets/Boots", style: "wingedboots", icon: "🥾", rarity: "Rare", atk: 28, def: 46, hp: 135, mp: 22, traits: ["Swiftness"], priceGold: 1400, priceCP: 55 },
+      // Super Expensive Exotic Gears (Strictly stronger than Rare)
+      { id: "shop_h1", name: "Archmage Halo Crown", slot: "Helmet", style: "circlet", icon: "👑", rarity: "Exotic", atk: 75, def: 92, hp: 280, mp: 115, traits: ["Arcane Surge", "Mana Siphon"], priceGold: 28000, priceCP: 750 },
+      { id: "shop_c1", name: "Royal Warden Plate", slot: "Chestplate", style: "cuirass", icon: "🥋", rarity: "Exotic", atk: 68, def: 125, hp: 380, mp: 65, traits: ["Fortified", "Vitality"], priceGold: 36000, priceCP: 920 },
+      { id: "shop_s1", name: "Dragonward Bulwark", slot: "Shield", style: "aegis", icon: "🛡️", rarity: "Exotic", atk: 60, def: 138, hp: 410, mp: 55, traits: ["Scale Shielding", "Thorns"], priceGold: 44000, priceCP: 1100 },
+      // Ultra-Expensive Legendary Relics (Strictly stronger than Exotic in every tier!)
+      { id: "shop_w2", name: "Sovereign Starlight Greatsword", slot: "Weapon", style: "sword", icon: "🗡️", rarity: "Legendary", atk: 245, def: 145, hp: 580, mp: 150, traits: ["Dragon Slayer", "Vampiric", "Devastation"], priceGold: 380000, priceCP: 4800 },
+      { id: "shop_a1", name: "Amulet of the LS Monarch", slot: "Accessory", style: "amulet", icon: "💎", rarity: "Legendary", atk: 195, def: 165, hp: 660, mp: 240, traits: ["Fortune's Favor", "Holy Ward", "Executioner"], priceGold: 450000, priceCP: 5500 }
+    ];
+
+    const COSMETIC_BOXES = [
+      { id: "cos_1", name: "Starlight Jester Reliquary", cosmeticTheme: "starlight_jester", icon: "🎭", desc: "Unboxes a custom-illustrated Starlight Jester Cosmetic Gear (Always 1+ Special Trait!).", costGold: 6500, costCP: 250, auraColor: "#38bdf8" },
+      { id: "cos_2", name: "Crimson Valkyrie Reliquary", cosmeticTheme: "crimson_valkyrie", icon: "🦇", desc: "Unboxes a custom-illustrated Crimson Valkyrie Cosmetic Gear with fierce winged flair!", costGold: 24000, costCP: 750, auraColor: "#f43f5e" },
+      { id: "cos_3", name: "Celestial Sovereign Reliquary", cosmeticTheme: "celestial_sovereign", icon: "🌟", desc: "High-tier Mystery Cosmetic Gear! Guaranteed Exotic or Legendary with radiant halo & wings.", costGold: 125000, costCP: 2800, auraColor: "#fbbf24" }
+    ];
+<!-- ... existing code ... -->
+    // =========================================================================
+    // 3. DATABASE & STATE MANAGEMENT (NO DEFAULT PLAYERS, 4-DIGIT STUDENT PIN)
+    // =========================================================================
+    const DB_KEY = "LS_LAND_RPG_DB_V2_CLEAN";
+
+    // Strict Rarity Multipliers & Minimum Stat Floors so Legendary > Exotic > Rare > Common ALWAYS holds
+    const RARITY_STAT_RULES = {
+      "Common":    { mult: 1.00, minAtk: 2,  minDef: 2,  minHp: 10,  minMp: 0,  baseBuyWorth: 60 },
+      "Rare":      { mult: 1.65, minAtk: 22, minDef: 20, minHp: 85,  minMp: 12, baseBuyWorth: 950 },
+      "Exotic":    { mult: 2.90, minAtk: 58, minDef: 55, minHp: 220, minMp: 38, baseBuyWorth: 18000 },
+      "Legendary": { mult: 5.20, minAtk: 145,minDef: 135,minHp: 480, minMp: 95, baseBuyWorth: 160000 }
+    };
+
+    function computeGearBuyWorth(item) {
+      if (!item) return 50;
+      if (item.buyPrice && item.buyPrice > 0) return item.buyPrice;
+      const rule = RARITY_STAT_RULES[item.rarity] || RARITY_STAT_RULES["Common"];
+      const statScore = (item.atk || 0) * 14 + (item.def || 0) * 12 + (item.hp || 0) * 2.5 + (item.mp || 0) * 10 + ((item.traits?.length || 0) * 450);
+      return Math.max(rule.baseBuyWorth, Math.round(rule.baseBuyWorth + statScore));
+    }
+
+    function computeGearSellPrice(item) {
+      const buyWorth = computeGearBuyWorth(item);
+      return Math.max(5, Math.round(buyWorth * 0.30));
+    }
+
+    function enforceRarityStatFloor(item) {
+      if (!item || !item.rarity) return item;
+      const rule = RARITY_STAT_RULES[item.rarity] || RARITY_STAT_RULES["Common"];
+      if (item.rarity !== "Common") {
+        item.atk = Math.max(rule.minAtk, item.atk || 0);
+        item.def = Math.max(rule.minDef, item.def || 0);
+        item.hp  = Math.max(rule.minHp,  item.hp  || 0);
+        item.mp  = Math.max(rule.minMp,  item.mp  || 0);
+      }
+      if (!item.buyPrice) item.buyPrice = computeGearBuyWorth(item);
+      item.sellValue = computeGearSellPrice(item);
+      return item;
+    }
+
+    function getAppearanceChangeCost(stu = getActiveStudent()) {
+      const count = Number(stu?.appearanceChangeCount || 0);
+      if (count <= 0) return 10;
+      if (count === 1) return 150;
+      if (count === 2) return 750;
+      return 750 * Math.pow(5, count - 2);
+    }
+
+    function createStarterGear(slot, subIdx) {
+      const st = GEAR_SUBTYPES[slot][subIdx % GEAR_SUBTYPES[slot].length];
+      const gear = {
+        uid: "gear_" + Math.random().toString(36).substring(2, 9) + "_" + Date.now(),
+        name: st.name,
+        slot: slot,
+        style: st.style,
+        icon: st.icon,
+        rarity: "Common",
+        atk: st.atk,
+        def: st.def,
+        hp: st.hp,
+        mp: st.mp,
+        traits: [],
+        durability: 100,
+        maxDurability: 100,
+        isCosmetic: false,
+        cosmeticTheme: null,
+        buyPrice: 60,
+        sellValue: 18
+      };
+      return enforceRarityStatFloor(gear);
+    }
+<!-- ... existing code ... -->
+        appearance: {
+          gender: gender,
+          skin: gender === "female" ? "#f5cba7" : "#fde68a",
+          hairStyle: gender === "female" ? 2 : 0,
+          hairColor: gender === "female" ? "#78350f" : "#1f2937",
+          eyeStyle: "determined",
+          facialFeature: "none",
+          cosmeticAura: null
+        },
+        appearanceChangeCount: 0,
+        equipped: {
+          "Weapon": w,
+<!-- ... existing code ... -->
+      GEAR_SLOTS.forEach((slot, idx) => {
+        if (!stu.equipped[slot]) {
+          stu.equipped[slot] = createStarterGear(slot, idx);
+        } else {
+          if (!Array.isArray(stu.equipped[slot].traits)) {
+            stu.equipped[slot].traits = stu.equipped[slot].traits ? Object.values(stu.equipped[slot].traits) : [];
+          }
+          enforceRarityStatFloor(stu.equipped[slot]);
+        }
+      });
+      if (!Array.isArray(stu.inventory)) {
+        stu.inventory = stu.inventory && typeof stu.inventory === "object" ? Object.values(stu.inventory) : [];
+      }
+      stu.inventory.forEach(item => {
+        if (item) {
+          if (!Array.isArray(item.traits)) {
+            item.traits = item.traits && typeof item.traits === "object" ? Object.values(item.traits) : [];
+          }
+          enforceRarityStatFloor(item);
+        }
+      });
+      if (typeof stu.appearanceChangeCount !== "number") stu.appearanceChangeCount = 0;
+      if (!stu.bonusStats || typeof stu.bonusStats !== "object") {
+<!-- ... existing code ... -->
+    // =========================================================================
+    // 6. SVG CARTOON PAPER-DOLL, COSMETIC GRAPHICS & MONSTER GENERATOR
+    // =========================================================================
+    function renderGearItemSvg(item, sizeClass = "w-9 h-9") {
+      if (!item) return "";
+      const rarityColor = item.rarity === "Legendary" ? "#fbbf24" :
+                          item.rarity === "Exotic" ? "#c084fc" :
+                          item.rarity === "Rare" ? "#60a5fa" : "#94a3b8";
+      const glow = item.rarity === "Legendary" ? 'class="legendary-svg-glow"' : '';
+
+      // Distinct Custom Graphics for Cosmetic Gear Themes!
+      if (item.isCosmetic || item.cosmeticTheme) {
+        const theme = item.cosmeticTheme || "starlight_jester";
+        if (theme === "starlight_jester") {
+          return `<svg viewBox="0 0 48 48" class="${sizeClass} shrink-0" ${glow}>
+            <circle cx="24" cy="24" r="21" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+            <path d="M10 30 Q12 10 24 22 Q36 10 38 30 Z" fill="#38bdf8" stroke="#e0f2fe" stroke-width="1.5"/>
+            <circle cx="12" cy="14" r="3.5" fill="#fbbf24"/><circle cx="36" cy="14" r="3.5" fill="#fbbf24"/>
+            <polygon points="24,8 26,13 31,13 27,16 28,21 24,18 20,21 21,16 17,13 22,13" fill="#fde047"/>
+          </svg>`;
+        } else if (theme === "crimson_valkyrie") {
+          return `<svg viewBox="0 0 48 48" class="${sizeClass} shrink-0" ${glow}>
+            <circle cx="24" cy="24" r="21" fill="#1f0910" stroke="#f43f5e" stroke-width="2"/>
+            <path d="M6 26 Q14 8 22 24 L24 12 L26 24 Q34 8 42 26 L34 34 L14 34 Z" fill="#e11d48" stroke="#fecdd3" stroke-width="1.5"/>
+            <polygon points="24,16 28,26 24,36 20,26" fill="#fbbf24"/>
+          </svg>`;
+        } else {
+          return `<svg viewBox="0 0 48 48" class="${sizeClass} shrink-0" ${glow}>
+            <circle cx="24" cy="24" r="21" fill="#1c1917" stroke="#fbbf24" stroke-width="2.5"/>
+            <circle cx="24" cy="24" r="15" fill="none" stroke="#fde047" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <polygon points="12,30 16,14 24,22 32,14 36,30" fill="#f59e0b" stroke="#fef08a" stroke-width="1.5"/>
+            <circle cx="24" cy="14" r="3" fill="#38bdf8"/>
+          </svg>`;
+        }
+      }
+
+      // Slot & Subtype Specific Vector Icons
+      if (item.slot === "Weapon") {
+        const st = item.style || (item.name.toLowerCase().includes("staff") ? "staff" : item.name.toLowerCase().includes("halberd") ? "halberd" : item.name.toLowerCase().includes("mace") ? "mace" : item.name.toLowerCase().includes("dagger") ? "dagger" : "sword");
+        if (st === "staff") {
+          return `<svg viewBox="0 0 48 48" class="${sizeClass} shrink-0"><circle cx="24" cy="24" r="20" fill="#0f172a" stroke="${rarityColor}" stroke-width="2"/><line x1="14" y1="38" x2="32" y2="14" stroke="#b45309" stroke-width="4" stroke-linecap="round"/><circle cx="34" cy="12" r="6" fill="#38bdf8" stroke="#e0f2fe" stroke-width="1.5"/></svg>`;
+        } else if (st === "halberd") {
+          return `<svg viewBox="0 0 48 48" class="${sizeClass} shrink-0"><circle cx="24" cy="24" r="20" fill="#0f172a" stroke="${rarityColor}" stroke-width="2"/><line x1="12" y1="38" x2="34" y2="10" stroke="#cbd5e1" stroke-width="3.5"/><path d="M26 12 Q38 14 36 24 Q28 22 26 12 Z" fill="${rarityColor}"/></svg>`;
+        } else if (st === "mace") {
+          return `<svg viewBox="0 0 48 48" class="${sizeClass} shrink-0"><circle cx="24" cy="24" r="20" fill="#0f172a" stroke="${rarityColor}" stroke-width="2"/><line x1="14" y1="36" x2="30" y2="18" stroke="#94a3b8" stroke-width="4"/><circle cx="32" cy="16" r="7" fill="${rarityColor}" stroke="#fff" stroke-width="1.2"/></svg>`;
+        }
+        return `<svg viewBox="0 0 48 48" class="${sizeClass} shrink-0"><circle cx="24" cy="24" r="20" fill="#0f172a" stroke="${rarityColor}" stroke-width="2"/><line x1="14" y1="34" x2="35" y2="13" stroke="${rarityColor}" stroke-width="4" stroke-linecap="round"/><line x1="16" y1="24" x2="24" y2="32" stroke="#f59e0b" stroke-width="3"/></svg>`;
+      }
+      if (item.slot === "Helmet") {
+        return `<svg viewBox="0 0 48 48" class="${sizeClass} shrink-0"><circle cx="24" cy="24" r="20" fill="#0f172a" stroke="${rarityColor}" stroke-width="2"/><path d="M14 32 L14 20 Q24 10 34 20 L34 32 Z" fill="${rarityColor}" stroke="#e2e8f0" stroke-width="1.5"/><rect x="18" y="23" width="12" height="4" fill="#0f172a"/></svg>`;
+      }
+      if (item.slot === "Chestplate") {
+        return `<svg viewBox="0 0 48 48" class="${sizeClass} shrink-0"><circle cx="24" cy="24" r="20" fill="#0f172a" stroke="${rarityColor}" stroke-width="2"/><path d="M14 14 L20 14 L24 19 L28 14 L34 14 L36 34 L12 34 Z" fill="${rarityColor}" stroke="#e2e8f0" stroke-width="1.5"/></svg>`;
+      }
+      if (item.slot === "Shield") {
+        return `<svg viewBox="0 0 48 48" class="${sizeClass} shrink-0"><circle cx="24" cy="24" r="20" fill="#0f172a" stroke="${rarityColor}" stroke-width="2"/><path d="M15 13 L33 13 L33 25 Q24 37 15 25 Z" fill="${rarityColor}" stroke="#fef08a" stroke-width="1.5"/></svg>`;
+      }
+      if (item.slot === "Gauntlets/Boots") {
+        return `<svg viewBox="0 0 48 48" class="${sizeClass} shrink-0"><circle cx="24" cy="24" r="20" fill="#0f172a" stroke="${rarityColor}" stroke-width="2"/><path d="M18 14 L26 14 L26 28 L34 30 L34 35 L16 35 Z" fill="${rarityColor}" stroke="#e2e8f0" stroke-width="1.5"/></svg>`;
+      }
+      return `<svg viewBox="0 0 48 48" class="${sizeClass} shrink-0"><circle cx="24" cy="24" r="20" fill="#0f172a" stroke="${rarityColor}" stroke-width="2"/><circle cx="24" cy="26" r="8" fill="none" stroke="${rarityColor}" stroke-width="3"/><polygon points="24,12 28,17 24,20 20,17" fill="#38bdf8"/></svg>`;
+    }
+
+    function renderHeroSvg(stu = getActiveStudent()) {
+      const app = stu.appearance || {};
+      const stats = computeHeroStats(stu);
+      const skin = app.skin || "#fde68a";
+      const hairColor = app.hairColor || "#1f2937";
+      const hairStyle = Number(app.hairStyle || 0);
+      const isFemale = app.gender === "female";
+      const hasRoyalAura = stu.classRank === 20 || stats.hasLegendary;
+
+      const weaponItem = stu.equipped["Weapon"];
+      const shieldItem = stu.equipped["Shield"];
+      const chestItem = stu.equipped["Chestplate"];
+      const helmItem = stu.equipped["Helmet"];
+      const bootsItem = stu.equipped["Gauntlets/Boots"];
+      const accItem = stu.equipped["Accessory"];
+
+      // Detect if any equipped piece is a Cosmetic Reliquary piece to show distinct Cosmetic Wings/Aura
+      const equippedList = Object.values(stu.equipped || {}).filter(Boolean);
+      const cosmeticPiece = equippedList.find(g => g.isCosmetic || g.cosmeticTheme);
+      const activeCosmeticTheme = cosmeticPiece?.cosmeticTheme || (cosmeticPiece ? "starlight_jester" : null);
+
+      const getRarityPalette = (item, fallback) => {
+        if (!item) return fallback;
+        if (item.cosmeticTheme === "starlight_jester") return "#38bdf8";
+        if (item.cosmeticTheme === "crimson_valkyrie") return "#e11d48";
+        if (item.cosmeticTheme === "celestial_sovereign") return "#fbbf24";
+        if (item.rarity === "Legendary") return "#f59e0b";
+        if (item.rarity === "Exotic") return "#a855f7";
+        if (item.rarity === "Rare") return "#3b82f6";
+        return fallback;
+      };
+
+      const chestColor = getRarityPalette(chestItem, "#64748b");
+      const helmColor  = getRarityPalette(helmItem, "#64748b");
+      const bootColor  = getRarityPalette(bootsItem, "#475569");
+      const shieldColor = getRarityPalette(shieldItem, "#3b82f6");
+      const weapColor  = getRarityPalette(weaponItem, "#e2e8f0");
+      const accColor   = getRarityPalette(accItem, "#10b981");
+
+      const weapGlow = weaponItem?.rarity === "Legendary" ? 'filter="url(#legGlow)"' : '';
+
+      // Cosmetic Theme Back-Wings / Halo / Cape Visuals
+      let cosmeticBackSvg = "";
+      if (activeCosmeticTheme === "starlight_jester") {
+        cosmeticBackSvg = `
+          <circle cx="50" cy="54" r="40" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="3 3"/>
+          <polygon points="14,32 18,26 24,30 18,36" fill="#38bdf8"/>
+          <polygon points="86,32 82,26 76,30 82,36" fill="#e879f9"/>
+        `;
+      } else if (activeCosmeticTheme === "crimson_valkyrie") {
+        cosmeticBackSvg = `
+          <path d="M32 60 Q6 32 10 64 Q18 68 32 72 Z" fill="#e11d48" stroke="#fecdd3" stroke-width="1.5"/>
+          <path d="M68 60 Q94 32 90 64 Q82 68 68 72 Z" fill="#e11d48" stroke="#fecdd3" stroke-width="1.5"/>
+        `;
+      } else if (activeCosmeticTheme === "celestial_sovereign") {
+        cosmeticBackSvg = `
+          <path d="M32 58 Q4 24 12 68 Q22 72 34 74 Z" fill="#fbbf24" stroke="#fef08a" stroke-width="1.5"/>
+          <path d="M68 58 Q96 24 88 68 Q78 72 66 74 Z" fill="#fbbf24" stroke="#fef08a" stroke-width="1.5"/>
+          <ellipse cx="50" cy="11" rx="16" ry="3.5" fill="none" stroke="#fef08a" stroke-width="2.5"/>
+        `;
+      }
+
+      let hairSvg = "";
+      if (hairStyle === 0) {
+        hairSvg = `<path d="M32 32 Q50 14 68 32 L70 42 Q50 34 30 42 Z" fill="${hairColor}"/>`;
+      } else if (hairStyle === 1) {
+        hairSvg = `<polygon points="28,38 34,18 43,28 50,14 58,28 66,18 72,38" fill="${hairColor}"/>`;
+      } else if (hairStyle === 2) {
+        hairSvg = `<path d="M28 34 Q50 14 72 34 L76 68 Q68 72 64 56 L36 56 Q32 72 24 68 Z" fill="${hairColor}"/>`;
+      } else if (hairStyle === 3) {
+        hairSvg = `<path d="M30 34 Q50 16 70 34 Z" fill="${hairColor}"/><circle cx="72" cy="28" r="8" fill="${hairColor}"/>`;
+      } else if (hairStyle === 4) {
+        hairSvg = `<path d="M30 34 Q50 16 70 34 Z" fill="${hairColor}"/><rect x="24" y="36" width="6" height="26" rx="3" fill="${hairColor}"/><rect x="70" y="36" width="6" height="26" rx="3" fill="${hairColor}"/>`;
+      } else {
+        hairSvg = `<path d="M31 35 Q50 20 69 35 Z" fill="${hairColor}"/>`;
+      }
+
+      let eyesSvg = `<circle cx="42" cy="45" r="3" fill="#111827"/><circle cx="58" cy="45" r="3" fill="#111827"/><circle cx="43" cy="44" r="1" fill="#fff"/><circle cx="59" cy="44" r="1" fill="#fff"/>`;
+      if (app.eyeStyle === "fierce") {
+        eyesSvg += `<line x1="37" y1="39" x2="46" y2="42" stroke="#111827" stroke-width="2.2"/><line x1="63" y1="39" x2="54" y2="42" stroke="#111827" stroke-width="2.2"/>`;
+      } else if (app.eyeStyle === "cheerful") {
+        eyesSvg = `<path d="M38 45 Q42 40 46 45" stroke="#111827" stroke-width="2.5" fill="none"/><path d="M54 45 Q58 40 62 45" stroke="#111827" stroke-width="2.5" fill="none"/>`;
+      } else if (app.eyeStyle === "wise") {
+        eyesSvg = `<line x1="38" y1="45" x2="46" y2="45" stroke="#111827" stroke-width="2.5"/><line x1="54" y1="45" x2="62" y2="45" stroke="#111827" stroke-width="2.5"/>`;
+      } else if (app.eyeStyle === "mystic") {
+        eyesSvg = `<circle cx="42" cy="45" r="3.5" fill="#38bdf8"/><circle cx="58" cy="45" r="3.5" fill="#38bdf8"/>`;
+      }
+
+      let featureSvg = "";
+      if (app.facialFeature === "scar") {
+        featureSvg = `<line x1="56" y1="40" x2="62" y2="52" stroke="#b91c1c" stroke-width="2"/>`;
+      } else if (app.facialFeature === "freckles") {
+        featureSvg = `<circle cx="37" cy="50" r="1" fill="#92400e"/><circle cx="40" cy="51" r="1" fill="#92400e"/><circle cx="60" cy="51" r="1" fill="#92400e"/><circle cx="63" cy="50" r="1" fill="#92400e"/>`;
+      } else if (app.facialFeature === "blush" || isFemale) {
+        featureSvg += `<ellipse cx="37" cy="50" rx="3.5" ry="2" fill="#f43f5e" opacity="0.45"/><ellipse cx="63" cy="50" rx="3.5" ry="2" fill="#f43f5e" opacity="0.45"/>`;
+      } else if (app.facialFeature === "beard") {
+        featureSvg = `<path d="M35 52 Q50 67 65 52 Q50 58 35 52 Z" fill="${hairColor}"/>`;
+      } else if (app.facialFeature === "rune") {
+        featureSvg = `<polygon points="50,34 52,38 50,42 48,38" fill="#a855f7"/>`;
+      }
+
+      // Dynamic Helmet Visuals Based on Equipped Helmet Subtype & Cosmetic Theme
+      let helmOverlaySvg = "";
+      if (helmItem) {
+        const hName = (helmItem.name || "").toLowerCase();
+        if (helmItem.cosmeticTheme === "starlight_jester") {
+          helmOverlaySvg = `<path d="M30 30 Q20 12 36 22 L50 12 L64 22 Q80 12 70 30 Z" fill="#38bdf8" stroke="#fde047" stroke-width="1.5"/><circle cx="24" cy="16" r="3" fill="#fbbf24"/><circle cx="76" cy="16" r="3" fill="#fbbf24"/>`;
+        } else if (helmItem.cosmeticTheme === "crimson_valkyrie") {
+          helmOverlaySvg = `<path d="M32 28 L22 12 L38 24 L50 14 L62 24 L78 12 L68 28 Z" fill="#e11d48" stroke="#fecdd3" stroke-width="1.5"/>`;
+        } else if (hName.includes("circlet") || hName.includes("crown") || stu.classRank === 20) {
+          helmOverlaySvg = `<polygon points="34,26 40,13 50,21 60,13 66,26" fill="${helmColor}" stroke="#fef08a" stroke-width="1.5"/><circle cx="50" cy="20" r="2.5" fill="#38bdf8"/>`;
+        } else if (hName.includes("greathelm") || hName.includes("iron") || hName.includes("garrison")) {
+          helmOverlaySvg = `<path d="M31 36 L31 22 Q50 12 69 22 L69 36 Z" fill="${helmColor}" stroke="#e2e8f0" stroke-width="1.5"/><line x1="36" y1="29" x2="64" y2="29" stroke="#0f172a" stroke-width="3"/>`;
+        } else if (hName.includes("hood")) {
+          helmOverlaySvg = `<path d="M29 38 Q50 10 71 38 Q50 26 29 38 Z" fill="${helmColor}" stroke="#fde047" stroke-width="1.2"/>`;
+        } else {
+          helmOverlaySvg = `<path d="M31 30 Q50 16 69 30 L72 34 L28 34 Z" fill="${helmColor}" stroke="#1e293b" stroke-width="1.2"/>`;
+        }
+      }
+
+      // Dynamic Chestplate Visuals Based on Equipped Chestplate
+      const cName = (chestItem?.name || "").toLowerCase();
+      let chestOverlaySvg = `<rect x="33" y="58" width="34" height="30" rx="7" fill="${chestColor}" stroke="#1e293b" stroke-width="2"/>`;
+      if (cName.includes("robe")) {
+        chestOverlaySvg = `<path d="M33 58 L67 58 L73 94 L27 94 Z" fill="${chestColor}" stroke="#fde047" stroke-width="1.5"/><line x1="50" y1="58" x2="50" y2="94" stroke="#fde047" stroke-width="2"/>`;
+      } else if (cName.includes("cuirass") || cName.includes("plate")) {
+        chestOverlaySvg = `
+          <rect x="32" y="58" width="36" height="30" rx="6" fill="${chestColor}" stroke="#e2e8f0" stroke-width="2"/>
+          <ellipse cx="31" cy="61" rx="7" ry="4" fill="${chestColor}" stroke="#e2e8f0" stroke-width="1.5"/>
+          <ellipse cx="69" cy="61" rx="7" ry="4" fill="${chestColor}" stroke="#e2e8f0" stroke-width="1.5"/>
+          <polygon points="50,63 55,72 50,81 45,72" fill="#fef08a" opacity="0.85"/>
+        `;
+      } else {
+        chestOverlaySvg += `<path d="M40 58 L50 72 L60 58" fill="none" stroke="#fbbf24" stroke-width="2"/>`;
+      }
+
+      // Dynamic Weapon Visuals Based on Equipped Weapon Subtype
+      const wName = (weaponItem?.name || "").toLowerCase();
+      let weaponSvg = "";
+      if (wName.includes("staff")) {
+        weaponSvg = `
+          <line x1="19" y1="88" x2="11" y2="26" stroke="#b45309" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="11" cy="23" r="6.5" fill="${weapColor}" stroke="#fef08a" stroke-width="1.8"/>
+        `;
+      } else if (wName.includes("halberd")) {
+        weaponSvg = `
+          <line x1="19" y1="88" x2="11" y2="22" stroke="#cbd5e1" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M11 24 Q26 26 23 39 Q13 36 11 24 Z" fill="${weapColor}" stroke="#fef08a" stroke-width="1.5"/>
+        `;
+      } else if (wName.includes("mace")) {
+        weaponSvg = `
+          <line x1="19" y1="82" x2="13" y2="38" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="12" cy="34" r="7.5" fill="${weapColor}" stroke="#fef08a" stroke-width="1.5"/>
+        `;
+      } else if (wName.includes("dagger")) {
+        weaponSvg = `
+          <line x1="19" y1="74" x2="13" y2="48" stroke="${weapColor}" stroke-width="4" stroke-linecap="round"/>
+          <line x1="12" y1="62" x2="21" y2="59" stroke="#f59e0b" stroke-width="3"/>
+        `;
+      } else {
+        weaponSvg = `
+          <line x1="18" y1="80" x2="10" y2="30" stroke="${weapColor}" stroke-width="4.5" stroke-linecap="round"/>
+          <line x1="9" y1="64" x2="23" y2="60" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round"/>
+        `;
+      }
+
+      // Dynamic Shield Visuals Based on Equipped Shield Subtype
+      const sName = (shieldItem?.name || "").toLowerCase();
+      let shieldSvg = "";
+      if (shieldItem) {
+        if (sName.includes("buckler")) {
+          shieldSvg = `<circle cx="80" cy="67" r="10" fill="${shieldColor}" stroke="#fef08a" stroke-width="2"/><circle cx="80" cy="67" r="3" fill="#fef08a"/>`;
+        } else if (sName.includes("pavise") || sName.includes("tower")) {
+          shieldSvg = `<rect x="71" y="52" width="18" height="30" rx="3" fill="${shieldColor}" stroke="#fef08a" stroke-width="2"/><line x1="80" y1="54" x2="80" y2="80" stroke="#fef08a" stroke-width="1.5"/>`;
+        } else {
+          shieldSvg = `<path d="M71 54 L89 54 L89 71 Q80 85 71 71 Z" fill="${shieldColor}" stroke="#fef08a" stroke-width="2"/>`;
+        }
+      }
+
+      // Dynamic Boots & Accessory Amulet Gem on Chest
+      const bootsWingSvg = (bootsItem?.name || "").toLowerCase().includes("wing")
+        ? `<polygon points="31,94 25,88 35,90" fill="#fde047"/><polygon points="69,94 75,88 65,90" fill="#fde047"/>`
+        : "";
+
+      return `
+      <svg viewBox="0 0 100 110" class="w-full h-full ${hasRoyalAura ? 'legendary-svg-glow' : ''}">
+        <defs>
+          <filter id="legGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="2.5" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        ${hasRoyalAura ? `<circle cx="50" cy="56" r="44" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4 3" opacity="0.75"/>` : ''}
+        ${cosmeticBackSvg}
+        <path d="M32 58 L22 96 L78 96 L68 58 Z" fill="${stu.classRank >= 14 ? '#991b1b' : '#334155'}" opacity="0.9"/>
+        ${chestOverlaySvg}
+        ${accItem ? `<circle cx="50" cy="64" r="3.5" fill="${accColor}" stroke="#fff" stroke-width="1"/>` : ''}
+        <rect x="36" y="86" width="11" height="16" rx="3" fill="${bootColor}" stroke="#0f172a" stroke-width="1.2"/>
+        <rect x="53" y="86" width="11" height="16" rx="3" fill="${bootColor}" stroke="#0f172a" stroke-width="1.2"/>
+        ${bootsWingSvg}
+        <circle cx="50" cy="44" r="18" fill="${skin}" stroke="#1e293b" stroke-width="2"/>
+        ${eyesSvg}
+        ${featureSvg}
+        <path d="M45 53 Q50 57 55 53" stroke="#111827" stroke-width="2" fill="none" stroke-linecap="round"/>
+        ${hairSvg}
+        ${helmOverlaySvg}
+        <g ${weapGlow}>
+          ${weaponSvg}
+        </g>
+        ${shieldSvg}
+      </svg>`;
+    }
+<!-- ... existing code ... -->
+    // =========================================================================
+    // 7. LOOT GENERATOR (STRICT RARITY HIERARCHY & 30% OF BUY WORTH SELL VALUE)
+    // =========================================================================
+    function rollRarity(forceMinRarity = null) {
+      const roll = Math.random() * 100;
+      let rarity = "Common";
+      if (roll < 0.3) rarity = "Legendary";
+      else if (roll < 2.3) rarity = "Exotic";
+      else if (roll < 27.3) rarity = "Rare";
+      else rarity = "Common";
+
+      if (forceMinRarity === "Exotic" && (rarity === "Common" || rarity === "Rare")) {
+        rarity = Math.random() < 0.08 ? "Legendary" : "Exotic";
+      }
+      return rarity;
+    }
+
+    function pickRandomTraits(count) {
+      const pool = [...SPECIAL_TRAITS];
+      const chosen = [];
+      for (let i = 0; i < count && pool.length > 0; i++) {
+        const idx = Math.floor(Math.random() * pool.length);
+        chosen.push(pool[idx].name);
+        pool.splice(idx, 1);
+      }
+      return chosen;
+    }
+
+    function generateGearDrop(dungeon = null, isCosmetic = false, forceMinRarity = null, cosmeticBox = null) {
+      const stu = getActiveStudent();
+      let slot = GEAR_SLOTS[Math.floor(Math.random() * GEAR_SLOTS.length)];
+      if (dungeon && Array.isArray(dungeon.biasSlots) && dungeon.biasSlots.length > 0) {
+        if (Math.random() < 0.60) {
+          slot = dungeon.biasSlots[Math.floor(Math.random() * dungeon.biasSlots.length)];
+        }
+      }
+
+      const rarity = rollRarity(forceMinRarity);
+      const rule = RARITY_STAT_RULES[rarity] || RARITY_STAT_RULES["Common"];
+      const tierScale = dungeon ? Math.max(1, dungeon.tierMult * 0.65) : Math.max(1, 1 + (stu.level || 1) * 0.08);
+      const subPool = GEAR_SUBTYPES[slot];
+      const baseSub = subPool[Math.floor(Math.random() * subPool.length)];
+
+      let numTraits = 0;
+      if (rarity === "Legendary") numTraits = Math.random() < 0.5 ? 2 : 3;
+      else if (rarity === "Exotic") numTraits = 1;
+      if (isCosmetic && numTraits < 1) numTraits = 1;
+
+      const traits = pickRandomTraits(numTraits);
+      const prefix = rarity === "Legendary" ? "Sovereign " :
+                     rarity === "Exotic" ? "Mythic " :
+                     rarity === "Rare" ? "Fine " : "";
+
+      const cosmeticTheme = cosmeticBox?.cosmeticTheme || (isCosmetic ? "starlight_jester" : null);
+      const cosmeticTitle = cosmeticTheme === "crimson_valkyrie" ? "Valkyrie " :
+                            cosmeticTheme === "celestial_sovereign" ? "Celestial " :
+                            isCosmetic ? "Starlight " : "";
+
+      const rawAtk = Math.round(baseSub.atk * tierScale * rule.mult);
+      const rawDef = Math.round(baseSub.def * tierScale * rule.mult);
+      const rawHp  = Math.round(baseSub.hp  * tierScale * rule.mult);
+      const rawMp  = Math.round(baseSub.mp  * tierScale * rule.mult);
+
+      const item = {
+        uid: "gear_" + Math.random().toString(36).substring(2, 9) + "_" + Date.now(),
+        name: (isCosmetic ? `✨ ${cosmeticTitle}` : prefix) + baseSub.name,
+        slot: slot,
+        style: baseSub.style,
+        icon: cosmeticBox?.icon || baseSub.icon,
+        rarity: rarity,
+        atk: Math.max(rule.minAtk, rawAtk),
+        def: Math.max(rule.minDef, rawDef),
+        hp:  Math.max(rule.minHp,  rawHp),
+        mp:  Math.max(rule.minMp,  rawMp),
+        traits: traits,
+        durability: 100,
+        maxDurability: 100,
+        isCosmetic: isCosmetic,
+        cosmeticTheme: cosmeticTheme,
+        buyPrice: cosmeticBox?.costGold || 0,
+        sellValue: 0
+      };
+
+      item.buyPrice = cosmeticBox?.costGold || computeGearBuyWorth(item);
+      item.sellValue = computeGearSellPrice(item);
+
+      if (rarity === "Legendary") playSfx("legendary");
+      return item;
+    }
+<!-- ... existing code ... -->
+    function renderInventoryAndPaperDoll() {
+      const stu = getActiveStudent();
+      const stats = computeHeroStats(stu);
+
+      const drawer = document.getElementById("heroCustomizerDrawer");
+      if (drawer && drawer.classList.contains("hidden")) {
+        document.getElementById("custGender").value = stu.appearance.gender || "male";
+        document.getElementById("custSkin").value = stu.appearance.skin || "#fde68a";
+        document.getElementById("custHairStyle").value = String(stu.appearance.hairStyle || 0);
+        document.getElementById("custHairColor").value = stu.appearance.hairColor || "#1f2937";
+        document.getElementById("custEyeStyle").value = stu.appearance.eyeStyle || "determined";
+        document.getElementById("custFacialFeature").value = stu.appearance.facialFeature || "none";
+      }
+
+      const nextLookCost = getAppearanceChangeCost(stu);
+      const costBadge = document.getElementById("btnCustomizeCostBadge");
+      if (costBadge) costBadge.textContent = nextLookCost;
+      const changesCountEl = document.getElementById("custChangesCountText");
+      if (changesCountEl) changesCountEl.textContent = stu.appearanceChangeCount || 0;
+      const nextCostTextEl = document.getElementById("custNextCostText");
+      if (nextCostTextEl) nextCostTextEl.textContent = `${nextLookCost} 🪙`;
+      const applyBtnCostEl = document.getElementById("btnApplyLookCostNum");
+      if (applyBtnCostEl) applyBtnCostEl.textContent = nextLookCost;
+
+      document.getElementById("inventoryPaperDollAvatar").innerHTML = renderHeroSvg(stu);
+      document.getElementById("paperDollClassTitle").textContent = `${stats.classObj.name} (${stats.classObj.mult.toFixed(2)}x)`;
+      document.getElementById("paperDollGearPower").textContent = `${stats.gearPower} ⚡`;
+
+      const renderSlotCard = (slot) => {
+        const item = stu.equipped[slot];
+        if (!item) {
+          return `<div class="p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 text-center">
+            <div class="text-[10px] text-slate-500 uppercase font-bold">${slot}</div>
+            <div class="text-xs text-slate-400 mt-1">Empty</div>
+          </div>`;
+        }
+        return `
+          <div class="p-2.5 rounded-xl border-2 rarity-${item.rarity} transition relative">
+            <div class="flex items-center justify-between text-[10px] font-bold">
+              <span class="text-slate-300 uppercase">${slot}</span>
+              <span class="${item.durability < 50 ? 'text-rose-400' : 'text-emerald-400'}">🔧 ${item.durability}%</span>
+            </div>
+            <div class="flex items-start gap-2 mt-1">
+              ${renderGearItemSvg(item, "w-8 h-8")}
+              <div class="text-xs font-extrabold text-white leading-snug break-words flex-1">${item.name}</div>
+            </div>
+            <div class="text-[10px] text-slate-200 mt-1 font-medium">⚔️+${item.atk} 🛡️+${item.def} ❤️+${item.hp} ✨+${item.mp}</div>
+            ${item.traits?.length ? `<div class="text-[10px] text-amber-300 font-bold mt-0.5 leading-snug break-words">★ ${item.traits.join(", ")}</div>` : ''}
+          </div>
+        `;
+      };
+
+      document.getElementById("paperDollLeftSlots").innerHTML =
+        ["Weapon", "Chestplate", "Shield"].map(renderSlotCard).join("");
+      document.getElementById("paperDollRightSlots").innerHTML =
+        ["Helmet", "Gauntlets/Boots", "Accessory"].map(renderSlotCard).join("");
+
+      document.getElementById("statTotalHp").textContent = stats.maxHp;
+      document.getElementById("statTotalAtk").textContent = stats.atk;
+      document.getElementById("statTotalDef").textContent = stats.def;
+      document.getElementById("statTotalMp").textContent = stats.mp;
+      document.getElementById("expProgressText").textContent =
+        `Lv. ${stu.level}/${stats.classObj.maxLv} • EXP: ${stu.exp}/${getExpForNextLevel(stu.level)}`;
+
+      document.getElementById("activeTraitsCount").textContent = stats.traits.length;
+      const traitsListEl = document.getElementById("activeTraitsList");
+      if (stats.traits.length === 0) {
+        traitsListEl.innerHTML = `<span class="text-xs text-slate-500 italic">Equip Exotic (Purple) or Legendary (Gold) gear to activate Special Traits!</span>`;
+      } else {
+        traitsListEl.innerHTML = stats.traits.map(tName => {
+          const tObj = SPECIAL_TRAITS.find(x => x.name === tName);
+          return `<span class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-400/50 text-amber-200 text-xs font-bold" title="${tObj?.desc || ''}">★ ${tName}: <span class="font-normal text-slate-200">${tObj?.desc || ''}</span></span>`;
+        }).join("");
+      }
+
+      const filterSlot = document.getElementById("invFilterSlot").value;
+      const filterRarity = document.getElementById("invFilterRarity").value;
+      const filtered = stu.inventory.filter(item => {
+        if (filterSlot !== "ALL" && item.slot !== filterSlot) return false;
+        if (filterRarity !== "ALL" && item.rarity !== filterRarity) return false;
+        return true;
+      });
+
+      const invGrid = document.getElementById("inventoryGrid");
+      if (filtered.length === 0) {
+        invGrid.innerHTML = `<div class="col-span-2 p-6 text-center text-xs text-slate-400 bg-slate-950/60 rounded-xl border border-slate-800">No matching items in backpack. Conquer dungeons or visit the Royal Shop!</div>`;
+      } else {
+        invGrid.innerHTML = filtered.map(item => {
+          const eqItem = stu.equipped[item.slot] || { atk: 0, def: 0, hp: 0, mp: 0, traits: [] };
+          const pwrDiff = computeSingleGearPower(item) - computeSingleGearPower(eqItem);
+          const pwrBadge = pwrDiff > 0
+            ? `<span class="px-1.5 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-extrabold">▲ +${pwrDiff} Power</span>`
+            : (pwrDiff < 0
+                ? `<span class="px-1.5 py-0.5 rounded bg-rose-500/20 border border-rose-500/40 text-rose-300 font-extrabold">▼ ${pwrDiff} Power</span>`
+                : `<span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-bold">═ +0 Power</span>`);
+
+          const statSpan = (icon, val, curVal) => {
+            const d = (val || 0) - (curVal || 0);
+            const cls = d > 0 ? "text-emerald-400 font-extrabold" : (d < 0 ? "text-rose-400 font-extrabold" : "text-slate-300");
+            const dStr = d > 0 ? `(+${d})` : (d < 0 ? `(${d})` : "");
+            return `<span class="${cls}">${icon}${val}${dStr ? ' ' + dStr : ''}</span>`;
+          };
+
+          const sellVal = computeGearSellPrice(item);
+          const buyVal = computeGearBuyWorth(item);
+
+          return `
+          <div data-hover-gear-uid="${item.uid}" class="p-3 rounded-xl border-2 rarity-${item.rarity} flex flex-col justify-between gap-2 cursor-pointer hover:ring-2 hover:ring-amber-400/70 transition">
+            <div>
+              <div class="flex flex-wrap items-center justify-between text-[10px] font-bold uppercase gap-1">
+                <span class="px-2 py-0.5 rounded bg-slate-950/80 text-amber-300">${item.rarity} • ${item.slot} ${item.isCosmetic ? '• ✨ COSMETIC' : ''}</span>
+                <div class="flex items-center gap-1.5">
+                  ${pwrBadge}
+                  <span class="text-emerald-400">🔧 ${item.durability}%</span>
+                </div>
+              </div>
+              <div class="flex items-start gap-2.5 mt-2">
+                ${renderGearItemSvg(item, "w-11 h-11")}
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-extrabold text-white leading-snug break-words">${item.name}</div>
+                  <div class="text-xs flex flex-wrap gap-x-2.5 gap-y-0.5 mt-1">
+                    ${statSpan("⚔️", item.atk, eqItem.atk)}
+                    ${statSpan("🛡️", item.def, eqItem.def)}
+                    ${statSpan("❤️", item.hp, eqItem.hp)}
+                    ${statSpan("✨", item.mp, eqItem.mp)}
+                  </div>
+                </div>
+              </div>
+              ${item.traits?.length ? `<div class="mt-2 flex flex-wrap gap-1">${item.traits.map(t => `<span class="px-2 py-0.5 rounded bg-amber-500/20 border border-amber-400/40 text-[10px] font-bold text-amber-200">★ ${t}</span>`).join("")}</div>` : ''}
+              <div class="mt-1.5 text-[10px] text-slate-400 flex items-center justify-between">
+                <span>Worth: ${buyVal} 🪙</span>
+                <span class="italic">🔍 Hover to compare</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 pt-2 border-t border-slate-800/80">
+              <button type="button" data-equip-uid="${item.uid}" class="flex-1 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition">
+                Equip Now
+              </button>
+              <button type="button" data-sell-uid="${item.uid}" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-900 text-slate-200 text-xs font-bold transition" title="30% of ${buyVal} Gold Buy Worth">
+                Sell (+${sellVal} 🪙)
+              </button>
+            </div>
+          </div>
+        `}).join("");
+      }
+
+      document.getElementById("traitsCodexGrid").innerHTML = SPECIAL_TRAITS.map(t => `
+        <div class="p-2 rounded-lg bg-slate-950/80 border border-slate-800">
+          <div class="font-bold text-amber-300">${t.id}. ${t.name}</div>
+          <div class="text-slate-400">${t.desc}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderShopAndArtisan() {
+      const stu = getActiveStudent();
+
+      document.getElementById("cosmeticBoxesList").innerHTML = COSMETIC_BOXES.map(box => `
+        <div class="bg-slate-950/90 border border-purple-500/40 rounded-xl p-3 flex items-center justify-between gap-2.5">
+          <div class="flex items-center gap-2.5">
+            ${renderGearItemSvg({ isCosmetic: true, cosmeticTheme: box.cosmeticTheme, rarity: box.id === "cos_3" ? "Legendary" : "Exotic" }, "w-12 h-12")}
+            <div>
+              <div class="text-xs sm:text-sm font-bold text-purple-200 leading-snug">${box.name}</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">${box.desc}</div>
+            </div>
+          </div>
+          <div class="flex flex-col gap-1 shrink-0">
+            <button type="button" data-buy-cosmetic-gold="${box.id}" class="px-2.5 py-1 rounded bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs">🪙 ${box.costGold}</button>
+            <button type="button" data-buy-cosmetic-cp="${box.id}" class="px-2.5 py-1 rounded bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs">🎓 ${box.costCP} CP</button>
+          </div>
+        </div>
+      `).join("");
+
+      document.getElementById("shopExclusiveList").innerHTML = SHOP_EXCLUSIVE_ITEMS.map(item => `
+        <div data-hover-shop-id="${item.id}" class="p-3 rounded-xl border-2 rarity-${item.rarity} flex items-center justify-between gap-2.5 cursor-pointer hover:ring-2 hover:ring-amber-400/60 transition">
+          <div class="flex items-start gap-2.5 flex-1 min-w-0">
+            ${renderGearItemSvg(item, "w-11 h-11")}
+            <div class="flex-1 min-w-0">
+              <div class="text-[10px] font-bold uppercase text-amber-300">${item.rarity} • ${item.slot} ${item.rarity === 'Common' ? '(High-Level Armory)' : '(Shop Exclusive)'}</div>
+              <div class="text-sm font-extrabold text-white mt-0.5 leading-snug break-words">${item.name}</div>
+              <div class="text-xs text-slate-300 mt-0.5">⚔️+${item.atk} 🛡️+${item.def} ❤️+${item.hp} ✨+${item.mp}</div>
+              ${item.traits.length ? `<div class="text-[11px] text-amber-200 font-semibold mt-0.5 leading-snug break-words">★ ${item.traits.join(", ")}</div>` : `<div class="text-[10px] text-emerald-300 mt-0.5">🔍 Hover to compare with your current ${item.slot}</div>`}
+              <div class="text-[10px] text-slate-400 mt-0.5">Resell Value (30%): ${Math.round(item.priceGold * 0.30)} 🪙</div>
+            </div>
+          </div>
+          <div class="flex flex-col gap-1.5 shrink-0">
+            <button type="button" data-buy-exclusive-gold="${item.id}" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs">🪙 ${item.priceGold}</button>
+            <button type="button" data-buy-exclusive-cp="${item.id}" class="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold text-xs">🎓 ${item.priceCP} CP</button>
+          </div>
+        </div>
+      `).join("");
+<!-- ... existing code ... -->
+    function renderAll() {
+      renderHeaderAndBanner();
+      renderWorldAndDungeon();
+      renderInventoryAndPaperDoll();
+      renderShopAndArtisan();
+      renderTrainingPortal();
+      renderQuestsAndStory();
+      renderSocialClassesTab();
+      renderTeacherPortal();
+      renderEntryLoginGate();
+    }
+
+    function showLoginGateSubpage(page) {
+      document.getElementById("loginViewRoleSelect")?.classList.toggle("hidden", page !== "role");
+      document.getElementById("loginViewStudentPage")?.classList.toggle("hidden", page !== "student");
+      document.getElementById("loginViewTeacherPage")?.classList.toggle("hidden", page !== "teacher");
+      renderEntryLoginGate();
+    }
+
+    function renderEntryLoginGate() {
+      const gateDot = document.getElementById("gateCloudDot");
+      const gateTxt = document.getElementById("gateCloudText");
+      if (gateDot && gateTxt) {
+        if (!cloudConfig.enabled || !cloudConfig.endpoint) {
+          gateDot.className = "w-2.5 h-2.5 rounded-full bg-slate-500";
+          gateTxt.textContent = "Local Mode (Click ⚙️ Cloud to connect)";
+        } else if (cloudSyncState.status === "synced") {
+          gateDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
+          gateTxt.textContent = `Connected: ${cloudConfig.roomId} (${db.students.length} Heroes)`;
+        } else if (cloudSyncState.status === "error") {
+          gateDot.className = "w-2.5 h-2.5 rounded-full bg-rose-500";
+          gateTxt.textContent = "Cloud Sync Error";
+        } else {
+          gateDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping";
+          gateTxt.textContent = "Syncing Roster...";
+        }
+      }
+
+      const sel = document.getElementById("gateStudentSelect");
+      if (!sel) return;
+      const curVal = sel.value;
+      if (db.students.length === 0) {
+        sel.innerHTML = `<option value="">No student heroes yet — Teacher must create roster first</option>`;
+      } else {
+        sel.innerHTML = db.students.map(s => {
+          const st = computeHeroStats(s);
+          return `<option value="${s.id}">${s.name} — Rank #${st.classObj.id} ${st.classObj.name} (Lv.${s.level})</option>`;
+        }).join("");
+        if (curVal && db.students.some(s => s.id === curVal)) {
+          sel.value = curVal;
+        }
+      }
+    }
+
+    // =========================================================================
+    // 13. EVENT LISTENERS & INTERACTION BINDINGS
+    // =========================================================================
+    window.onload = function() {
+      // Always start on the dedicated Role Selection Login Page when opening the link!
+      db.activeStudentId = null;
+      teacherUnlocked = false;
+      showLoginGateSubpage("role");
+
+      appendLog("👑 Welcome to Chronicles of the LS Land! All 5 Dungeons are unlocked. Check your Loadout or enter the Forgotten Armory!", "amber");
+      renderAll();
+      updateCloudStatusUI();
+      if (cloudConfig.enabled && cloudConfig.endpoint) {
+        pullFromCloud(true, false);
+        startCloudAutoPolling();
+      }
+
+      // Dedicated Entry Login Screen Navigation (Separate Student & Teacher Pages)
+      document.getElementById("btnChooseStudentRole").addEventListener("click", () => {
+        playSfx("click");
+        if (cloudConfig.enabled && cloudConfig.endpoint) pullFromCloud(true, false);
+        document.getElementById("gateStudentError").classList.add("hidden");
+        document.getElementById("gateStudentPinInput").value = "";
+        showLoginGateSubpage("student");
+      });
+
+      document.getElementById("btnChooseTeacherRole").addEventListener("click", () => {
+        playSfx("click");
+        if (cloudConfig.enabled && cloudConfig.endpoint) pullFromCloud(true, false);
+        document.getElementById("gateTeacherError").classList.add("hidden");
+        document.getElementById("gateTeacherPinInput").value = "";
+        showLoginGateSubpage("teacher");
+      });
+
+      document.getElementById("btnBackFromStudentLogin").addEventListener("click", () => {
+        playSfx("click");
+        showLoginGateSubpage("role");
+      });
+
+      document.getElementById("btnBackFromTeacherLogin").addEventListener("click", () => {
+        playSfx("click");
+        showLoginGateSubpage("role");
+      });
+
+      document.getElementById("btnGateRefreshCloud").addEventListener("click", async () => {
+        await pullFromCloud(false, false);
+        renderEntryLoginGate();
+      });
+
+      document.getElementById("btnGateOpenCloudSetup").addEventListener("click", () => {
+        document.getElementById("cloudSyncModal").classList.remove("hidden");
+      });
+
+      document.getElementById("btnGateStudentLoginSubmit").addEventListener("click", () => {
+        const stuId = document.getElementById("gateStudentSelect").value;
+        const pinVal = document.getElementById("gateStudentPinInput").value.trim();
+        const errEl = document.getElementById("gateStudentError");
+        const stu = db.students.find(s => s.id === stuId);
+        if (!stu) return showToast("No student profile available! Ask your Teacher to create your character.", "rose");
+        if (String(stu.pinCode) !== String(pinVal)) {
+          errEl.classList.remove("hidden");
+          playSfx("danger");
+          return;
+        }
+        errEl.classList.add("hidden");
+        db.activeStudentId = stu.id;
+        teacherUnlocked = false;
+        combatState.active = false;
+        currentDungeon = null;
+        document.getElementById("entryLoginScreen").classList.add("hidden");
+        switchTab("world");
+        playSfx("fanfare");
+        saveDatabase();
+        renderAll();
+        showToast(`🔓 Welcome back, Hero ${stu.name}!`, "emerald");
+      });
+
+      document.getElementById("btnGateTeacherLoginSubmit").addEventListener("click", () => {
+        const pinVal = document.getElementById("gateTeacherPinInput").value.trim();
+        const errEl = document.getElementById("gateTeacherError");
+        if (pinVal !== String(db.teacherPin || "1234")) {
+          errEl.classList.remove("hidden");
+          playSfx("danger");
+          return;
+        }
+        errEl.classList.add("hidden");
+        teacherUnlocked = true;
+        document.getElementById("entryLoginScreen").classList.add("hidden");
+        switchTab("teacher");
+        playSfx("fanfare");
+        renderAll();
+        showToast("🎓 Teacher Command Center Unlocked!", "emerald");
+      });
+
+      document.getElementById("btnReturnToLoginGate").addEventListener("click", () => {
+        db.activeStudentId = null;
+        teacherUnlocked = false;
+        combatState.active = false;
+        currentDungeon = null;
+        showLoginGateSubpage("role");
+        document.getElementById("entryLoginScreen").classList.remove("hidden");
+        renderAll();
+      });
+
+      document.querySelectorAll(".nav-tab-btn").forEach(btn => {
+<!-- ... existing code ... -->
+      document.getElementById("btnToggleCustomizeHero").addEventListener("click", () => {
+        const stu = getActiveStudent();
+        document.getElementById("custGender").value = stu.appearance.gender || "male";
+        document.getElementById("custSkin").value = stu.appearance.skin || "#fde68a";
+        document.getElementById("custHairStyle").value = String(stu.appearance.hairStyle || 0);
+        document.getElementById("custHairColor").value = stu.appearance.hairColor || "#1f2937";
+        document.getElementById("custEyeStyle").value = stu.appearance.eyeStyle || "determined";
+        document.getElementById("custFacialFeature").value = stu.appearance.facialFeature || "none";
+        document.getElementById("heroCustomizerDrawer").classList.toggle("hidden");
+      });
+      document.getElementById("btnCloseCustomizeHero").addEventListener("click", () => {
+        document.getElementById("heroCustomizerDrawer").classList.add("hidden");
+        renderInventoryAndPaperDoll();
+      });
+
+      // Progressive Paid Appearance Change Confirmation (10 -> 150 -> 750 -> 3750...)
+      document.getElementById("btnConfirmApplyAppearance").addEventListener("click", () => {
+        const stu = requireLoggedInStudent();
+        if (!stu) return;
+        const cost = getAppearanceChangeCost(stu);
+        if (stu.gold < cost) {
+          playSfx("danger");
+          return showToast(`Need ${cost} Gold to restyle your hero's appearance!`, "rose");
+        }
+        stu.gold -= cost;
+        stu.appearanceChangeCount = (stu.appearanceChangeCount || 0) + 1;
+        stu.appearance.gender = document.getElementById("custGender").value;
+        stu.appearance.skin = document.getElementById("custSkin").value;
+        stu.appearance.hairStyle = Number(document.getElementById("custHairStyle").value);
+        stu.appearance.hairColor = document.getElementById("custHairColor").value;
+        stu.appearance.eyeStyle = document.getElementById("custEyeStyle").value;
+        stu.appearance.facialFeature = document.getElementById("custFacialFeature").value;
+        document.getElementById("heroCustomizerDrawer").classList.add("hidden");
+        playSfx("fanfare");
+        saveDatabase();
+        renderAll();
+        showToast(`✨ Appearance updated for ${cost} Gold! (Next change: ${getAppearanceChangeCost(stu)} Gold)`, "amber");
+      });
+
+      document.getElementById("invFilterSlot").addEventListener("change", renderInventoryAndPaperDoll);
+      document.getElementById("invFilterRarity").addEventListener("change", renderInventoryAndPaperDoll);
+      document.getElementById("btnSellAllCommon").addEventListener("click", () => {
+        const stu = getActiveStudent();
+        const commons = stu.inventory.filter(i => i.rarity === "Common");
+        if (commons.length === 0) {
+          showToast("No Common items in backpack to sell!", "slate");
+          return;
+        }
+        const totalGold = commons.reduce((sum, i) => sum + computeGearSellPrice(i), 0);
+        stu.inventory = stu.inventory.filter(i => i.rarity !== "Common");
+        stu.gold += totalGold;
+        playSfx("fanfare");
+        saveDatabase();
+        renderAll();
+        showToast(`🪙 Sold ${commons.length} Common gear(s) for +${totalGold} Gold (30% of buy worth)!`, "amber");
+      });
+<!-- ... existing code ... -->
+        const sellBtn = e.target.closest("[data-sell-uid]");
+        if (sellBtn) {
+          document.getElementById("gearComparisonTooltip")?.classList.add("hidden");
+          const uid = sellBtn.getAttribute("data-sell-uid");
+          const stu = getActiveStudent();
+          const idx = stu.inventory.findIndex(i => i.uid === uid);
+          if (idx !== -1) {
+            const item = stu.inventory.splice(idx, 1)[0];
+            const val = computeGearSellPrice(item);
+            stu.gold += val;
+            playSfx("click");
+            saveDatabase();
+            renderAll();
+            showToast(`🪙 Sold ${item.name} for +${val} Gold (30% of buy worth)!`, "amber");
+          }
+          return;
+        }
+<!-- ... existing code ... -->
+        const cosGoldBtn = e.target.closest("[data-buy-cosmetic-gold]");
+        const cosCpBtn = e.target.closest("[data-buy-cosmetic-cp]");
+        if (cosGoldBtn || cosCpBtn) {
+          const boxId = (cosGoldBtn || cosCpBtn).getAttribute(cosGoldBtn ? "data-buy-cosmetic-gold" : "data-buy-cosmetic-cp");
+          const box = COSMETIC_BOXES.find(b => b.id === boxId);
+          if (!box) return;
+          const stu = getActiveStudent();
+          if (cosGoldBtn) {
+            if (stu.gold < box.costGold) return showToast(`Need ${box.costGold} Gold!`, "rose");
+            stu.gold -= box.costGold;
+          } else {
+            if (stu.cp < box.costCP) return showToast(`Need ${box.costCP} CP!`, "rose");
+            stu.cp -= box.costCP;
+          }
+          const minRarity = box.id === "cos_3" ? "Exotic" : null;
+          const unboxed = generateGearDrop(null, true, minRarity, box);
+          stu.inventory.unshift(unboxed);
+          playSfx("legendary");
+          saveDatabase();
+          renderAll();
+          showRoyalDecreeModal(
+            box.icon,
+            `Mystery Cosmetic Revealed: [${unboxed.rarity}]!`,
+            `<div class="p-3.5 rounded-xl border-2 rarity-${unboxed.rarity} flex flex-col items-center">
+               ${renderGearItemSvg(unboxed, "w-16 h-16")}
+               <div class="text-xs font-bold uppercase text-amber-300 mt-2">${unboxed.rarity} • ${unboxed.slot}</div>
+               <div class="text-base font-extrabold text-white mt-0.5">${unboxed.name}</div>
+               <div class="text-xs text-slate-200 mt-1">⚔️+${unboxed.atk}  🛡️+${unboxed.def}  ❤️+${unboxed.hp}  ✨+${unboxed.mp}</div>
+               <div class="text-xs text-amber-300 font-bold mt-1.5">★ Guaranteed Trait(s): ${unboxed.traits.join(", ")}</div>
+               <div class="text-[11px] text-slate-400 mt-1">Resell Value (30%): ${unboxed.sellValue} 🪙</div>
+             </div>
+             <p class="text-[11px] text-slate-400 mt-2">Added to your Hero Backpack! Equip it in the Hero & Loadout tab to transform your hero's look.</p>`
+          );
+          return;
+        }
+
+        const exGoldBtn = e.target.closest("[data-buy-exclusive-gold]");
+        const exCpBtn = e.target.closest("[data-buy-exclusive-cp]");
+        if (exGoldBtn || exCpBtn) {
+          const itemId = (exGoldBtn || exCpBtn).getAttribute(exGoldBtn ? "data-buy-exclusive-gold" : "data-buy-exclusive-cp");
+          const tpl = SHOP_EXCLUSIVE_ITEMS.find(x => x.id === itemId);
+          if (!tpl) return;
+          const stu = getActiveStudent();
+          if (exGoldBtn) {
+            if (stu.gold < tpl.priceGold) return showToast(`Need ${tpl.priceGold} Gold!`, "rose");
+            stu.gold -= tpl.priceGold;
+          } else {
+            if (stu.cp < tpl.priceCP) return showToast(`Need ${tpl.priceCP} CP!`, "rose");
+            stu.cp -= tpl.priceCP;
+          }
+          const bought = {
+            uid: "gear_shop_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6),
+            name: tpl.name,
+            slot: tpl.slot,
+            style: tpl.style,
+            icon: tpl.icon,
+            rarity: tpl.rarity,
+            atk: tpl.atk,
+            def: tpl.def,
+            hp: tpl.hp,
+            mp: tpl.mp,
+            traits: [...tpl.traits],
+            durability: 100,
+            maxDurability: 100,
+            isCosmetic: false,
+            cosmeticTheme: null,
+            buyPrice: tpl.priceGold,
+            sellValue: Math.round(tpl.priceGold * 0.30)
+          };
+          stu.inventory.unshift(bought);
+          playSfx("fanfare");
+          saveDatabase();
+          renderAll();
+          showToast(`⚔️ Purchased [${bought.rarity}] ${bought.name}! Check your Backpack.`, "amber");
+          return;
+        }
+<!-- ... existing code ... -->
