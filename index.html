@@ -595,7 +595,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
 
 })();</script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Chronicles of the LS Land — Classroom RPG</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&amp;family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
@@ -606,10 +606,80 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
     .font-medieval {
       font-family: 'Cinzel', Georgia, serif;
     }
+    html {
+      height: 100%;
+      -webkit-text-size-adjust: 100%;
+    }
     body {
       background: radial-gradient(circle at top, #1e1b2e 0%, #0f111a 100%);
       color: #f3f4f6;
       overflow-x: hidden;
+      overflow-y: auto;
+      min-height: 100%;
+      min-height: 100dvh;
+      -webkit-overflow-scrolling: touch;
+    }
+    /* Mobile: scroll-friendly layout — avoid fixed heights that clip content */
+    @media (max-width: 640px) {
+      header.sticky {
+        position: sticky;
+        max-height: none;
+      }
+      .tab-panel {
+        padding-bottom: 2.5rem;
+      }
+      #inventoryGrid,
+      #shopExclusiveList,
+      #artisanGearList,
+      #sideQuestsList {
+        max-height: none !important;
+        overflow: visible !important;
+      }
+      #adventureLogContainer {
+        max-height: 14rem;
+      }
+      .h-72 {
+        height: auto !important;
+        min-height: 12rem;
+        max-height: 18rem;
+      }
+      /* Readable tap targets on phone */
+      button, [role="button"], select, .cursor-pointer {
+        min-height: 44px;
+      }
+      button.text-xs, button.text-\[11px\], button.text-\[10px\] {
+        padding-top: 0.625rem;
+        padding-bottom: 0.625rem;
+      }
+      #gearComparisonTooltip {
+        width: calc(100vw - 1.5rem) !important;
+        max-width: calc(100vw - 1.5rem);
+        left: 0.75rem !important;
+        right: 0.75rem;
+      }
+      #toastContainer {
+        left: 0.75rem;
+        right: 0.75rem;
+        max-width: none;
+      }
+      nav.no-scrollbar, nav {
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .max-h-\[540px\],
+      .max-h-\[520px\],
+      .max-h-\[430px\] {
+        max-height: none;
+      }
+    }
+    @media (max-width: 640px) {
+      /* Flex containers that were clipping on small screens */
+      main, #appRoot, .max-w-7xl {
+        max-width: 100%;
+      }
+      section.tab-panel > .grid {
+        gap: 0.75rem;
+      }
     }
     /* Rarity Borders & Glows */
     .rarity-Common {
@@ -1226,7 +1296,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
             </div>
 
             <!-- Adventure & Combat Log -->
-            <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-3.5 flex flex-col h-72">
+            <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-3.5 flex flex-col h-72 sm:h-72 mobile-log-panel" style="min-height:12rem;">
               <div class="flex items-center justify-between mb-2">
                 <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400">📜 Battle &amp; Exploration Chronicle</h4>
                 <button id="btnClearCombatLog" type="button" class="text-[11px] text-slate-400 hover:text-white">Clear</button>
@@ -1519,7 +1589,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
             </div>
 
             <!-- Inventory Grid -->
-            <div id="inventoryGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[540px] overflow-y-auto pr-1"><div class="col-span-2 p-6 text-center text-xs text-slate-400 bg-slate-950/60 rounded-xl border border-slate-800">No matching items in backpack. Conquer dungeons or visit the Royal Shop!</div></div>
+            <div id="inventoryGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-none sm:max-h-[540px] overflow-y-visible sm:overflow-y-auto pr-1"><div class="col-span-2 p-6 text-center text-xs text-slate-400 bg-slate-950/60 rounded-xl border border-slate-800">No matching items in backpack. Conquer dungeons or visit the Royal Shop!</div></div>
           </div>
 
           <!-- Reference Drawer: All 20 Special Traits Codex -->
@@ -1732,11 +1802,11 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
             <h2 class="font-medieval text-lg font-bold text-white">⚔️ Royal Armory (Shop-Exclusive Gear)</h2>
             <p class="text-xs text-slate-400">Affordable high-level Common upgrades for steady progression, plus super-expensive Exotic &amp; Legendary relics!</p>
           </div>
-          <div id="shopExclusiveList" class="space-y-2.5 max-h-[520px] overflow-y-auto pr-1">
+          <div id="shopExclusiveList" class="space-y-2.5 max-h-none sm:max-h-[520px] overflow-y-visible sm:overflow-y-auto pr-1">
         <div data-hover-shop-id="shop_c_w1" class="p-3 rounded-xl border-2 rarity-Common flex items-center justify-between gap-2 cursor-pointer hover:ring-2 hover:ring-amber-400/60 transition">
           <div>
             <div class="text-[10px] font-bold uppercase text-amber-300">Common • Weapon (High-Level Armory)</div>
-            <div class="text-sm font-extrabold text-white mt-0.5">⚔️ High-Carbon Steel Broadsword (Lv. 5+)</div>
+            <div class="text-sm font-extrabold text-white mt-0.5">⚔️ Steel Longsword</div>
             <div class="text-xs text-slate-300">⚔️+24 🛡️+5 ❤️+28 ✨+6</div>
             <div class="text-[10px] text-emerald-300 mt-0.5">🔍 Hover to compare with your current Weapon</div>
           </div>
@@ -1749,7 +1819,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
         <div data-hover-shop-id="shop_c_h1" class="p-3 rounded-xl border-2 rarity-Common flex items-center justify-between gap-2 cursor-pointer hover:ring-2 hover:ring-amber-400/60 transition">
           <div>
             <div class="text-[10px] font-bold uppercase text-amber-300">Common • Helmet (High-Level Armory)</div>
-            <div class="text-sm font-extrabold text-white mt-0.5">🪖 Reinforced Garrison Helm (Lv. 5+)</div>
+            <div class="text-sm font-extrabold text-white mt-0.5">🪖 Iron Greathelm</div>
             <div class="text-xs text-slate-300">⚔️+5 🛡️+14 ❤️+45 ✨+8</div>
             <div class="text-[10px] text-emerald-300 mt-0.5">🔍 Hover to compare with your current Helmet</div>
           </div>
@@ -1762,7 +1832,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
         <div data-hover-shop-id="shop_c_c1" class="p-3 rounded-xl border-2 rarity-Common flex items-center justify-between gap-2 cursor-pointer hover:ring-2 hover:ring-amber-400/60 transition">
           <div>
             <div class="text-[10px] font-bold uppercase text-amber-300">Common • Chestplate (High-Level Armory)</div>
-            <div class="text-sm font-extrabold text-white mt-0.5">🦺 Heavy Infantry Hauberk (Lv. 6+)</div>
+            <div class="text-sm font-extrabold text-white mt-0.5">🦺 Steel Chain Armour</div>
             <div class="text-xs text-slate-300">⚔️+6 🛡️+24 ❤️+75 ✨+10</div>
             <div class="text-[10px] text-emerald-300 mt-0.5">🔍 Hover to compare with your current Chestplate</div>
           </div>
@@ -1775,7 +1845,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
         <div data-hover-shop-id="shop_c_b1" class="p-3 rounded-xl border-2 rarity-Common flex items-center justify-between gap-2 cursor-pointer hover:ring-2 hover:ring-amber-400/60 transition">
           <div>
             <div class="text-[10px] font-bold uppercase text-amber-300">Common • Gauntlets/Boots (High-Level Armory)</div>
-            <div class="text-sm font-extrabold text-white mt-0.5">🥾 Marching Iron Greaves (Lv. 6+)</div>
+            <div class="text-sm font-extrabold text-white mt-0.5">🥾 Iron Greaves</div>
             <div class="text-xs text-slate-300">⚔️+8 🛡️+16 ❤️+42 ✨+6</div>
             <div class="text-[10px] text-emerald-300 mt-0.5">🔍 Hover to compare with your current Gauntlets/Boots</div>
           </div>
@@ -1788,7 +1858,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
         <div data-hover-shop-id="shop_c_s1" class="p-3 rounded-xl border-2 rarity-Common flex items-center justify-between gap-2 cursor-pointer hover:ring-2 hover:ring-amber-400/60 transition">
           <div>
             <div class="text-[10px] font-bold uppercase text-amber-300">Common • Shield (High-Level Armory)</div>
-            <div class="text-sm font-extrabold text-white mt-0.5">🛡️ Watchtower Iron Shield (Lv. 7+)</div>
+            <div class="text-sm font-extrabold text-white mt-0.5">🛡️ Iron Heater Shield</div>
             <div class="text-xs text-slate-300">⚔️+4 🛡️+22 ❤️+64 ✨+5</div>
             <div class="text-[10px] text-emerald-300 mt-0.5">🔍 Hover to compare with your current Shield</div>
           </div>
@@ -1801,7 +1871,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
         <div data-hover-shop-id="shop_c_a1" class="p-3 rounded-xl border-2 rarity-Common flex items-center justify-between gap-2 cursor-pointer hover:ring-2 hover:ring-amber-400/60 transition">
           <div>
             <div class="text-[10px] font-bold uppercase text-amber-300">Common • Accessory (High-Level Armory)</div>
-            <div class="text-sm font-extrabold text-white mt-0.5">💍 Guild Journeyman Signet (Lv. 8+)</div>
+            <div class="text-sm font-extrabold text-white mt-0.5">💍 Bronze Ring</div>
             <div class="text-xs text-slate-300">⚔️+14 🛡️+10 ❤️+48 ✨+18</div>
             <div class="text-[10px] text-emerald-300 mt-0.5">🔍 Hover to compare with your current Accessory</div>
           </div>
@@ -1814,7 +1884,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
         <div data-hover-shop-id="shop_c_w2" class="p-3 rounded-xl border-2 rarity-Common flex items-center justify-between gap-2 cursor-pointer hover:ring-2 hover:ring-amber-400/60 transition">
           <div>
             <div class="text-[10px] font-bold uppercase text-amber-300">Common • Weapon (High-Level Armory)</div>
-            <div class="text-sm font-extrabold text-white mt-0.5">🪓 Veteran's Damascus Halberd (Lv. 15+)</div>
+            <div class="text-sm font-extrabold text-white mt-0.5">🪓 Steel Halberd</div>
             <div class="text-xs text-slate-300">⚔️+42 🛡️+10 ❤️+55 ✨+12</div>
             <div class="text-[10px] text-emerald-300 mt-0.5">🔍 Hover to compare with your current Weapon</div>
           </div>
@@ -1827,7 +1897,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
         <div data-hover-shop-id="shop_c_c2" class="p-3 rounded-xl border-2 rarity-Common flex items-center justify-between gap-2 cursor-pointer hover:ring-2 hover:ring-amber-400/60 transition">
           <div>
             <div class="text-[10px] font-bold uppercase text-amber-300">Common • Chestplate (High-Level Armory)</div>
-            <div class="text-sm font-extrabold text-white mt-0.5">🥋 Citadel Footman Cuirass (Lv. 15+)</div>
+            <div class="text-sm font-extrabold text-white mt-0.5">🥋 Iron Plate Mail</div>
             <div class="text-xs text-slate-300">⚔️+12 🛡️+40 ❤️+135 ✨+18</div>
             <div class="text-[10px] text-emerald-300 mt-0.5">🔍 Hover to compare with your current Chestplate</div>
           </div>
@@ -1840,7 +1910,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
         <div data-hover-shop-id="shop_w1" class="p-3 rounded-xl border-2 rarity-Rare flex items-center justify-between gap-2 cursor-pointer hover:ring-2 hover:ring-amber-400/60 transition">
           <div>
             <div class="text-[10px] font-bold uppercase text-amber-300">Rare • Weapon (Shop Exclusive)</div>
-            <div class="text-sm font-extrabold text-white mt-0.5">⚔️ LS Scholar's Sunblade</div>
+            <div class="text-sm font-extrabold text-white mt-0.5">⚔️ Advanced Longsword</div>
             <div class="text-xs text-slate-300">⚔️+56 🛡️+14 ❤️+85 ✨+24</div>
             <div class="text-[11px] text-amber-200 font-semibold mt-0.5">★ Critical Eye</div>
           </div>
@@ -1853,7 +1923,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
         <div data-hover-shop-id="shop_b1" class="p-3 rounded-xl border-2 rarity-Rare flex items-center justify-between gap-2 cursor-pointer hover:ring-2 hover:ring-amber-400/60 transition">
           <div>
             <div class="text-[10px] font-bold uppercase text-amber-300">Rare • Gauntlets/Boots (Shop Exclusive)</div>
-            <div class="text-sm font-extrabold text-white mt-0.5">🥾 Vanguard Knight Greaves</div>
+            <div class="text-sm font-extrabold text-white mt-0.5">🥾 Refined Greaves</div>
             <div class="text-xs text-slate-300">⚔️+24 🛡️+34 ❤️+95 ✨+16</div>
             <div class="text-[11px] text-amber-200 font-semibold mt-0.5">★ Swiftness</div>
           </div>
@@ -1905,7 +1975,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
         <div data-hover-shop-id="shop_w2" class="p-3 rounded-xl border-2 rarity-Legendary flex items-center justify-between gap-2 cursor-pointer hover:ring-2 hover:ring-amber-400/60 transition">
           <div>
             <div class="text-[10px] font-bold uppercase text-amber-300">Legendary • Weapon (Shop Exclusive)</div>
-            <div class="text-sm font-extrabold text-white mt-0.5">🗡️ Sovereign Starlight Greatsword</div>
+            <div class="text-sm font-extrabold text-white mt-0.5">🗡️ Legendary Greatsword</div>
             <div class="text-xs text-slate-300">⚔️+185 🛡️+65 ❤️+420 ✨+95</div>
             <div class="text-[11px] text-amber-200 font-semibold mt-0.5">★ Dragon Slayer, Vampiric, Devastation</div>
           </div>
@@ -1918,7 +1988,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
         <div data-hover-shop-id="shop_a1" class="p-3 rounded-xl border-2 rarity-Legendary flex items-center justify-between gap-2 cursor-pointer hover:ring-2 hover:ring-amber-400/60 transition">
           <div>
             <div class="text-[10px] font-bold uppercase text-amber-300">Legendary • Accessory (Shop Exclusive)</div>
-            <div class="text-sm font-extrabold text-white mt-0.5">💎 Amulet of the LS Monarch</div>
+            <div class="text-sm font-extrabold text-white mt-0.5">💎 Legendary Amulet</div>
             <div class="text-xs text-slate-300">⚔️+125 🛡️+110 ❤️+560 ✨+180</div>
             <div class="text-[11px] text-amber-200 font-semibold mt-0.5">★ Fortune's Favor, Holy Ward, Executioner</div>
           </div>
@@ -1950,7 +2020,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
             </button>
           </div>
 
-          <div id="artisanGearList" class="space-y-2 max-h-[430px] overflow-y-auto pr-1">
+          <div id="artisanGearList" class="space-y-2 max-h-none sm:max-h-[430px] overflow-y-visible sm:overflow-y-auto pr-1">
           <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between gap-2">
             <div>
               <div class="text-xs font-bold text-white">🗡️ Shadow Dagger <span class="text-amber-300">[Common]</span></div>
@@ -2657,7 +2727,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
             </div>
             <span class="text-2xl">🧭</span>
           </div>
-          <div id="sideQuestsList" class="space-y-2.5 max-h-[540px] overflow-y-auto pr-1">
+          <div id="sideQuestsList" class="space-y-2.5 max-h-none sm:max-h-[540px] overflow-y-visible sm:overflow-y-auto pr-1">
           <div class="p-3 rounded-xl bg-slate-950/90 border border-slate-800 flex items-center justify-between gap-3">
             <div>
               <div class="text-xs font-bold text-white">Cartographer of LS Land <span class="text-amber-300">(0/10)</span></div>
@@ -4171,43 +4241,123 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
 
     const GEAR_SUBTYPES = {
       "Weapon": [
-        { name: "Shadow Dagger", icon: "🗡️", atk: 12, def: 1, hp: 5, mp: 4 },
-        { name: "Knightly Broadsword", icon: "⚔️", atk: 15, def: 3, hp: 10, mp: 2 },
-        { name: "Royal Halberd", icon: "🪓", atk: 18, def: 2, hp: 8, mp: 0 },
-        { name: "Archmage Runed Staff", icon: "🦯", atk: 10, def: 2, hp: 8, mp: 14 },
-        { name: "Crusader War Mace", icon: "🔨", atk: 14, def: 4, hp: 14, mp: 4 }
+        { name: "Shadowfang Needle", typeName: "Dagger", icon: "🗡️", atk: 12, def: 1, hp: 5, mp: 4 },
+        { name: "Knightly Broadsword", typeName: "Longsword", icon: "⚔️", atk: 15, def: 3, hp: 10, mp: 2 },
+        { name: "Skyreaver Halberd", typeName: "Halberd", icon: "🪓", atk: 18, def: 2, hp: 8, mp: 0 },
+        { name: "Archmage Runed Staff", typeName: "Staff", icon: "🦯", atk: 10, def: 2, hp: 8, mp: 14 },
+        { name: "Crusader War Mace", typeName: "Mace", icon: "🔨", atk: 14, def: 4, hp: 14, mp: 4 }
       ],
       "Helmet": [
-        { name: "Cloth Scholar Hood", icon: "🧢", atk: 1, def: 5, hp: 15, mp: 10 },
-        { name: "Ranger Leather Cap", icon: "🪖", atk: 3, def: 7, hp: 20, mp: 4 },
-        { name: "Ironclad Greathelm", icon: "⛑️", atk: 2, def: 11, hp: 30, mp: 0 },
-        { name: "Arcane Star Circlet", icon: "👑", atk: 4, def: 6, hp: 18, mp: 14 }
+        { name: "Whispering Scholar Hood", typeName: "Hood", icon: "🧢", atk: 1, def: 5, hp: 15, mp: 10 },
+        { name: "Ranger Trail Cap", typeName: "Cap", icon: "🪖", atk: 3, def: 7, hp: 20, mp: 4 },
+        { name: "Ironclad Greathelm", typeName: "Greathelm", icon: "⛑️", atk: 2, def: 11, hp: 30, mp: 0 },
+        { name: "Arcane Star Circlet", typeName: "Circlet", icon: "👑", atk: 4, def: 6, hp: 18, mp: 14 }
       ],
       "Chestplate": [
-        { name: "Mystic Cloth Robes", icon: "👘", atk: 2, def: 8, hp: 25, mp: 15 },
-        { name: "Studded Brigandine", icon: "🦺", atk: 4, def: 13, hp: 38, mp: 5 },
-        { name: "Templar Plate Mail", icon: "🥋", atk: 3, def: 18, hp: 52, mp: 2 },
-        { name: "Dragonscale Cuirass", icon: "🛡️", atk: 6, def: 20, hp: 60, mp: 8 }
+        { name: "Mystic Nightweave Robes", typeName: "Robes", icon: "👘", atk: 2, def: 8, hp: 25, mp: 15 },
+        { name: "Studded Brigandine", typeName: "Chain Armour", icon: "🦺", atk: 4, def: 13, hp: 38, mp: 5 },
+        { name: "Templar Plate Mail", typeName: "Plate Mail", icon: "🥋", atk: 3, def: 18, hp: 52, mp: 2 },
+        { name: "Dragonscale Cuirass", typeName: "Cuirass", icon: "🛡️", atk: 6, def: 20, hp: 60, mp: 8 }
       ],
       "Gauntlets/Boots": [
-        { name: "Swift Leather Greaves", icon: "🥾", atk: 3, def: 6, hp: 18, mp: 4 },
-        { name: "Iron Sabatons", icon: "🦿", atk: 2, def: 10, hp: 26, mp: 0 },
-        { name: "Vanguard War Gauntlets", icon: "🧤", atk: 6, def: 8, hp: 22, mp: 3 },
-        { name: "Winged Strider Boots", icon: "👟", atk: 4, def: 7, hp: 20, mp: 9 }
+        { name: "Swiftpath Greaves", typeName: "Greaves", icon: "🥾", atk: 3, def: 6, hp: 18, mp: 4 },
+        { name: "Forgeguard Sabatons", typeName: "Sabatons", icon: "🦿", atk: 2, def: 10, hp: 26, mp: 0 },
+        { name: "Vanguard War Gauntlets", typeName: "Gauntlets", icon: "🧤", atk: 6, def: 8, hp: 22, mp: 3 },
+        { name: "Winged Strider Boots", typeName: "Boots", icon: "👟", atk: 4, def: 7, hp: 20, mp: 9 }
       ],
       "Shield": [
-        { name: "Oaken Buckler", icon: "🪵", atk: 1, def: 8, hp: 20, mp: 2 },
-        { name: "Royal Heater Shield", icon: "🛡️", atk: 2, def: 13, hp: 34, mp: 3 },
-        { name: "Fortress Tower Pavise", icon: "🧱", atk: 0, def: 18, hp: 48, mp: 0 },
-        { name: "Aegis Runed Ward", icon: "💠", atk: 3, def: 14, hp: 32, mp: 12 }
+        { name: "Thornwood Buckler", typeName: "Buckler", icon: "🪵", atk: 1, def: 8, hp: 20, mp: 2 },
+        { name: "Royal Heater Shield", typeName: "Heater Shield", icon: "🛡️", atk: 2, def: 13, hp: 34, mp: 3 },
+        { name: "Fortress Tower Pavise", typeName: "Tower Shield", icon: "🧱", atk: 0, def: 18, hp: 48, mp: 0 },
+        { name: "Aegis Runed Ward", typeName: "Ward Shield", icon: "💠", atk: 3, def: 14, hp: 32, mp: 12 }
       ],
       "Accessory": [
-        { name: "Signet Ring of Valor", icon: "💍", atk: 6, def: 4, hp: 18, mp: 6 },
-        { name: "LS Scholar Amulet", icon: "📿", atk: 4, def: 5, hp: 22, mp: 14 },
-        { name: "Chrono Sun Talisman", icon: "🏅", atk: 8, def: 6, hp: 28, mp: 10 },
-        { name: "Sovereign Emerald Brooch", icon: "💎", atk: 7, def: 7, hp: 35, mp: 12 }
+        { name: "Signet Ring of Valor", typeName: "Ring", icon: "💍", atk: 6, def: 4, hp: 18, mp: 6 },
+        { name: "LS Scholar Amulet", typeName: "Amulet", icon: "📿", atk: 4, def: 5, hp: 22, mp: 14 },
+        { name: "Chrono Sun Talisman", typeName: "Talisman", icon: "🏅", atk: 8, def: 6, hp: 28, mp: 10 },
+        { name: "Emerald Sovereign Brooch", typeName: "Brooch", icon: "💎", atk: 7, def: 7, hp: 35, mp: 12 }
       ]
     };
+
+    // Rarity sell multipliers vs a shared base sell value
+    const RARITY_SELL_MULT = { Common: 1, Rare: 3, Exotic: 8, Legendary: 20 };
+    // Power multipliers — gaps large enough that Legendary > Exotic > Rare > Common always
+    // (after blending subtype stats toward slot averages to limit intra-slot variance)
+    const RARITY_POWER_MULT = { Common: 1.0, Rare: 1.6, Exotic: 2.55, Legendary: 4.1 };
+    const COMMON_MATERIALS = ["Iron", "Steel", "Bronze", "Oak", "Leather", "Bone", "Copper", "Stone", "Hide", "Tin"];
+    const RARE_ADJECTIVES = ["Refined", "Advanced", "Polished", "Tempered", "Reinforced", "Hardened"];
+    const EXOTIC_NAME_FLAIR = [
+      "Voidwoven", "Stormforged", "Bloodmoon", "Starfall", "Nightbloom", "Embercoil",
+      "Gloomshard", "Sunken", "Riftbound", "Thornlace", "Cinderwisp", "Moonfang"
+    ];
+
+    function pickRandom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function getSlotStatAverages(slot) {
+      const pool = GEAR_SUBTYPES[slot] || [];
+      if (!pool.length) return { atk: 1, def: 1, hp: 10, mp: 1 };
+      const n = pool.length;
+      return {
+        atk: pool.reduce((s, x) => s + x.atk, 0) / n,
+        def: pool.reduce((s, x) => s + x.def, 0) / n,
+        hp:  pool.reduce((s, x) => s + x.hp, 0) / n,
+        mp:  pool.reduce((s, x) => s + x.mp, 0) / n
+      };
+    }
+
+    /** Blend subtype toward slot average so rarity bands never overlap. */
+    function blendSubtypeStats(slot, baseSub) {
+      const avg = getSlotStatAverages(slot);
+      const wSub = 0.30, wAvg = 0.70;
+      return {
+        atk: avg.atk * wAvg + baseSub.atk * wSub,
+        def: avg.def * wAvg + baseSub.def * wSub,
+        hp:  avg.hp  * wAvg + baseSub.hp  * wSub,
+        mp:  avg.mp  * wAvg + baseSub.mp  * wSub
+      };
+    }
+
+    function buildGearName(slot, rarity, baseSub, isCosmetic = false) {
+      const typeName = (baseSub && baseSub.typeName) ? baseSub.typeName : (slot === "Gauntlets/Boots" ? "Greaves" : slot);
+      if (isCosmetic) {
+        if (rarity === "Legendary") return `✨ Legendary Cosmetic ${typeName}`;
+        if (rarity === "Exotic") return `✨ ${pickRandom(EXOTIC_NAME_FLAIR)} Cosmetic ${typeName}`;
+        if (rarity === "Rare") return `✨ ${pickRandom(RARE_ADJECTIVES)} Cosmetic ${typeName}`;
+        return `✨ Cosmetic ${pickRandom(COMMON_MATERIALS)} ${typeName}`;
+      }
+      if (rarity === "Legendary") {
+        return `Legendary ${typeName}`;
+      }
+      if (rarity === "Exotic") {
+        // Wilder/creative names allowed — flair + fancy base name or type
+        const fancy = (baseSub && baseSub.name) ? baseSub.name : typeName;
+        // Prefer creative full names; occasionally flair + type
+        return Math.random() < 0.55 ? fancy : `${pickRandom(EXOTIC_NAME_FLAIR)} ${typeName}`;
+      }
+      if (rarity === "Rare") {
+        return `${pickRandom(RARE_ADJECTIVES)} ${typeName}`;
+      }
+      // Common: material + weapon/armor type only (no fancy adjectives)
+      return `${pickRandom(COMMON_MATERIALS)} ${typeName}`;
+    }
+
+    function getSellValueForRarity(baseSell, rarity, tierScale = 1) {
+      const mult = RARITY_SELL_MULT[rarity] != null ? RARITY_SELL_MULT[rarity] : 1;
+      return Math.max(1, Math.round(baseSell * tierScale * mult));
+    }
+
+    function scaleStatsByRarity(slot, baseSub, rarity, tierScale) {
+      const powerMult = RARITY_POWER_MULT[rarity] != null ? RARITY_POWER_MULT[rarity] : 1;
+      const blended = blendSubtypeStats(slot, baseSub);
+      return {
+        atk: Math.max(1, Math.round(blended.atk * tierScale * powerMult)),
+        def: Math.max(0, Math.round(blended.def * tierScale * powerMult)),
+        hp:  Math.max(5, Math.round(blended.hp  * tierScale * powerMult)),
+        mp:  Math.max(0, Math.round(blended.mp  * tierScale * powerMult))
+      };
+    }
 
     const MONSTERS = [
       { id: "dire_wolf", name: "Dire Wolf", category: "Beasts", color: "#9ca3af", baseHp: 125, baseAtk: 32, baseDef: 12 },
@@ -4314,25 +4464,25 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
     ];
 
     const SHOP_EXCLUSIVE_ITEMS = [
-      // Affordable Higher-Level Common Gears (Great stepping-stone upgrades!)
-      { id: "shop_c_w1", name: "High-Carbon Steel Broadsword (Lv. 5+)", slot: "Weapon", icon: "⚔️", rarity: "Common", atk: 24, def: 5, hp: 28, mp: 6, traits: [], priceGold: 180, priceCP: 8 },
-      { id: "shop_c_h1", name: "Reinforced Garrison Helm (Lv. 5+)", slot: "Helmet", icon: "🪖", rarity: "Common", atk: 5, def: 14, hp: 45, mp: 8, traits: [], priceGold: 160, priceCP: 7 },
-      { id: "shop_c_c1", name: "Heavy Infantry Hauberk (Lv. 6+)", slot: "Chestplate", icon: "🦺", rarity: "Common", atk: 6, def: 24, hp: 75, mp: 10, traits: [], priceGold: 220, priceCP: 10 },
-      { id: "shop_c_b1", name: "Marching Iron Greaves (Lv. 6+)", slot: "Gauntlets/Boots", icon: "🥾", rarity: "Common", atk: 8, def: 16, hp: 42, mp: 6, traits: [], priceGold: 175, priceCP: 8 },
-      { id: "shop_c_s1", name: "Watchtower Iron Shield (Lv. 7+)", slot: "Shield", icon: "🛡️", rarity: "Common", atk: 4, def: 22, hp: 64, mp: 5, traits: [], priceGold: 210, priceCP: 9 },
-      { id: "shop_c_a1", name: "Guild Journeyman Signet (Lv. 8+)", slot: "Accessory", icon: "💍", rarity: "Common", atk: 14, def: 10, hp: 48, mp: 18, traits: [], priceGold: 240, priceCP: 11 },
-      { id: "shop_c_w2", name: "Veteran's Damascus Halberd (Lv. 15+)", slot: "Weapon", icon: "🪓", rarity: "Common", atk: 42, def: 10, hp: 55, mp: 12, traits: [], priceGold: 520, priceCP: 22 },
-      { id: "shop_c_c2", name: "Citadel Footman Cuirass (Lv. 15+)", slot: "Chestplate", icon: "🥋", rarity: "Common", atk: 12, def: 40, hp: 135, mp: 18, traits: [], priceGold: 580, priceCP: 25 },
-      // Mid-Tier Rare Shop Gears
-      { id: "shop_w1", name: "LS Scholar's Sunblade", slot: "Weapon", icon: "⚔️", rarity: "Rare", atk: 56, def: 14, hp: 85, mp: 24, traits: ["Critical Eye"], priceGold: 1250, priceCP: 48 },
-      { id: "shop_b1", name: "Vanguard Knight Greaves", slot: "Gauntlets/Boots", icon: "🥾", rarity: "Rare", atk: 24, def: 34, hp: 95, mp: 16, traits: ["Swiftness"], priceGold: 1400, priceCP: 55 },
-      // Super Expensive Exotic Gears (Long-term goals)
+      // Affordable Higher-Level Common Gears — material + type only
+      { id: "shop_c_w1", name: "Steel Longsword", slot: "Weapon", icon: "⚔️", rarity: "Common", atk: 24, def: 5, hp: 28, mp: 6, traits: [], priceGold: 180, priceCP: 8 },
+      { id: "shop_c_h1", name: "Iron Greathelm", slot: "Helmet", icon: "🪖", rarity: "Common", atk: 5, def: 14, hp: 45, mp: 8, traits: [], priceGold: 160, priceCP: 7 },
+      { id: "shop_c_c1", name: "Steel Chain Armour", slot: "Chestplate", icon: "🦺", rarity: "Common", atk: 6, def: 24, hp: 75, mp: 10, traits: [], priceGold: 220, priceCP: 10 },
+      { id: "shop_c_b1", name: "Iron Greaves", slot: "Gauntlets/Boots", icon: "🥾", rarity: "Common", atk: 8, def: 16, hp: 42, mp: 6, traits: [], priceGold: 175, priceCP: 8 },
+      { id: "shop_c_s1", name: "Iron Heater Shield", slot: "Shield", icon: "🛡️", rarity: "Common", atk: 4, def: 22, hp: 64, mp: 5, traits: [], priceGold: 210, priceCP: 9 },
+      { id: "shop_c_a1", name: "Bronze Ring", slot: "Accessory", icon: "💍", rarity: "Common", atk: 14, def: 10, hp: 48, mp: 18, traits: [], priceGold: 240, priceCP: 11 },
+      { id: "shop_c_w2", name: "Steel Halberd", slot: "Weapon", icon: "🪓", rarity: "Common", atk: 42, def: 10, hp: 55, mp: 12, traits: [], priceGold: 520, priceCP: 22 },
+      { id: "shop_c_c2", name: "Iron Plate Mail", slot: "Chestplate", icon: "🥋", rarity: "Common", atk: 12, def: 40, hp: 135, mp: 18, traits: [], priceGold: 580, priceCP: 25 },
+      // Rare — refined/advanced + type
+      { id: "shop_w1", name: "Advanced Longsword", slot: "Weapon", icon: "⚔️", rarity: "Rare", atk: 56, def: 14, hp: 85, mp: 24, traits: ["Critical Eye"], priceGold: 1250, priceCP: 48 },
+      { id: "shop_b1", name: "Refined Greaves", slot: "Gauntlets/Boots", icon: "🥾", rarity: "Rare", atk: 24, def: 34, hp: 95, mp: 16, traits: ["Swiftness"], priceGold: 1400, priceCP: 55 },
+      // Exotic — wilder creative names
       { id: "shop_h1", name: "Archmage Halo Crown", slot: "Helmet", icon: "👑", rarity: "Exotic", atk: 44, def: 58, hp: 195, mp: 85, traits: ["Arcane Surge", "Mana Siphon"], priceGold: 28000, priceCP: 750 },
       { id: "shop_c1", name: "Royal Warden Plate", slot: "Chestplate", icon: "🥋", rarity: "Exotic", atk: 35, def: 88, hp: 310, mp: 42, traits: ["Fortified", "Vitality"], priceGold: 36000, priceCP: 920 },
       { id: "shop_s1", name: "Dragonward Bulwark", slot: "Shield", icon: "🛡️", rarity: "Exotic", atk: 28, def: 105, hp: 350, mp: 35, traits: ["Scale Shielding", "Thorns"], priceGold: 44000, priceCP: 1100 },
-      // Ultra-Expensive Legendary Relics (Months-long aspirational treasures)
-      { id: "shop_w2", name: "Sovereign Starlight Greatsword", slot: "Weapon", icon: "🗡️", rarity: "Legendary", atk: 185, def: 65, hp: 420, mp: 95, traits: ["Dragon Slayer", "Vampiric", "Devastation"], priceGold: 380000, priceCP: 4800 },
-      { id: "shop_a1", name: "Amulet of the LS Monarch", slot: "Accessory", icon: "💎", rarity: "Legendary", atk: 125, def: 110, hp: 560, mp: 180, traits: ["Fortune's Favor", "Holy Ward", "Executioner"], priceGold: 450000, priceCP: 5500 }
+      // Legendary — ALWAYS start with Legendary + type
+      { id: "shop_w2", name: "Legendary Greatsword", slot: "Weapon", icon: "🗡️", rarity: "Legendary", atk: 185, def: 65, hp: 420, mp: 95, traits: ["Dragon Slayer", "Vampiric", "Devastation"], priceGold: 380000, priceCP: 4800 },
+      { id: "shop_a1", name: "Legendary Amulet", slot: "Accessory", icon: "💎", rarity: "Legendary", atk: 125, def: 110, hp: 560, mp: 180, traits: ["Fortune's Favor", "Holy Ward", "Executioner"], priceGold: 450000, priceCP: 5500 }
     ];
 
     const COSMETIC_BOXES = [
@@ -4417,7 +4567,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       const st = GEAR_SUBTYPES[slot][subIdx % GEAR_SUBTYPES[slot].length];
       return {
         uid: "gear_" + Math.random().toString(36).substring(2, 9) + "_" + Date.now(),
-        name: st.name,
+        name: buildGearName(slot, "Common", st, false),
         slot: slot,
         icon: st.icon,
         rarity: "Common",
@@ -4429,7 +4579,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         durability: 100,
         maxDurability: 100,
         isCosmetic: false,
-        sellValue: 15
+        sellValue: getSellValueForRarity(15, "Common", 1)
       };
     }
 
@@ -5508,9 +5658,6 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       }
 
       const rarity = rollRarity(forceMinRarity);
-      const rarityMult = rarity === "Legendary" ? 2.5 :
-                         rarity === "Exotic" ? 1.7 :
-                         rarity === "Rare" ? 1.2 : 1.0;
 
       const tierScale = dungeon ? dungeon.tierMult : Math.max(1, stu.level * 0.22);
       const subPool = GEAR_SUBTYPES[slot];
@@ -5522,25 +5669,24 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       if (isCosmetic && numTraits < 1) numTraits = 1;
 
       const traits = pickRandomTraits(numTraits);
-      const prefix = rarity === "Legendary" ? "Sovereign " :
-                     rarity === "Exotic" ? "Mythic " :
-                     rarity === "Rare" ? "Fine " : "";
+      const scaled = scaleStatsByRarity(slot, baseSub, rarity, tierScale);
 
       const item = {
         uid: "gear_" + Math.random().toString(36).substring(2, 9) + "_" + Date.now(),
-        name: (isCosmetic ? "✨ Cosmetic " : prefix) + baseSub.name,
+        name: buildGearName(slot, rarity, baseSub, isCosmetic),
         slot: slot,
         icon: baseSub.icon,
         rarity: rarity,
-        atk: Math.max(1, Math.round(baseSub.atk * tierScale * rarityMult)),
-        def: Math.max(1, Math.round(baseSub.def * tierScale * rarityMult)),
-        hp:  Math.max(5, Math.round(baseSub.hp  * tierScale * rarityMult)),
-        mp:  Math.max(0, Math.round(baseSub.mp  * tierScale * rarityMult)),
+        atk: scaled.atk,
+        def: Math.max(1, scaled.def),
+        hp:  scaled.hp,
+        mp:  scaled.mp,
         traits: traits,
         durability: 100,
         maxDurability: 100,
         isCosmetic: isCosmetic,
-        sellValue: Math.round(25 * tierScale * rarityMult)
+        // Resell: Common 1x, Rare 3x, Exotic 8x, Legendary 20x vs base
+        sellValue: getSellValueForRarity(25, rarity, tierScale)
       };
 
       if (rarity === "Legendary") playSfx("legendary");
@@ -7945,7 +8091,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
             durability: 100,
             maxDurability: 100,
             isCosmetic: false,
-            sellValue: Math.round(tpl.priceGold * 0.4)
+            sellValue: getSellValueForRarity(Math.max(20, Math.round(tpl.priceGold * 0.05)), tpl.rarity, 1)
           };
           stu.inventory.unshift(bought);
           playSfx("fanfare");
