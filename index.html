@@ -4545,6 +4545,153 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       return true;
     }
 
+    function estimateGearLootTier(gear) {
+      if (!gear || !gear.slot || !gear.rarity) return null;
+      if (!GEAR_SUBTYPES[gear.slot]) return null;
+      const powerMult = RARITY_POWER_MULT[gear.rarity];
+      if (powerMult == null || !(powerMult > 0)) return null;
+      const baseSub = inferGearSubtype(gear);
+      if (!baseSub || baseSub.atk == null) {
+        // Fallback: slot averages as synthetic subtype
+        const avg = getSlotStatAverages(gear.slot);
+        baseSub.atk = avg.atk; baseSub.def = avg.def; baseSub.hp = avg.hp; baseSub.mp = avg.mp;
+      }
+      const blended = blendSubtypeStats(gear.slot, baseSub);
+      const ratios = [];
+      for (const key of ["atk", "def", "hp", "mp"]) {
+        const stat = Number(gear[key]);
+        const base = Number(blended[key]);
+        if (!Number.isFinite(stat) || stat <= 0) continue;
+        if (!Number.isFinite(base) || base <= 0) continue;
+        const denom = base * powerMult;
+        if (denom <= 0) continue;
+        ratios.push(stat / denom);
+      }
+      if (!ratios.length) return null;
+      ratios.sort((a, b) => a - b);
+      const mid = Math.floor(ratios.length / 2);
+      const median = ratios.length % 2 ? ratios[mid] : (ratios[mid - 1] + ratios[mid]) / 2;
+      return median;
+    }
+
+    /** One-time: rescale gear dropped under inflated original-dungeon loot tiers back to pre-retune loot. */
+    function migrateGearLootRetune(dbObj) {
+      if (!dbObj || !Array.isArray(dbObj.students)) return false;
+      if (dbObj.gearLootRetuneV1) return false;
+
+      const NEW_ORIG = [
+        { newLoot: 3.5, oldLoot: 1.12, dungeonId: "armory" },
+        { newLoot: 8, oldLoot: 2.45, dungeonId: "catacombs" },
+        { newLoot: 15, oldLoot: 4.8, dungeonId: "ironclad" },
+        { newLoot: 27, oldLoot: 8.5, dungeonId: "abyssal" },
+        { newLoot: 46, oldLoot: 14.5, dungeonId: "citadel" }
+      ];
+      const OLD_ORIG = [
+        { loot: 1.12, dungeonId: "armory" },
+        { loot: 2.45, dungeonId: "catacombs" },
+        { loot: 4.8, dungeonId: "ironclad" },
+        { loot: 8.5, dungeonId: "abyssal" },
+        { loot: 14.5, dungeonId: "citadel" }
+      ];
+      const HIGH = [
+        { loot: 55, dungeonId: "tempest" },
+        { loot: 120, dungeonId: "voidcathedral" },
+        { loot: 220, dungeonId: "titanforge" },
+        { loot: 350, dungeonId: "guildsanctum" }
+      ];
+      const TOL = 0.12;
+
+      const shopIds = new Set();
+      if (typeof SHOP_EXCLUSIVE_ITEMS !== "undefined" && Array.isArray(SHOP_EXCLUSIVE_ITEMS)) {
+        for (const t of SHOP_EXCLUSIVE_ITEMS) {
+          if (t && t.id) shopIds.add(t.id);
+        }
+      }
+
+      let rescaled = 0, stamped = 0, skipped = 0;
+
+      const relErr = (est, band) => Math.abs(est - band) / band;
+
+      const processGear = (gear) => {
+        if (!gear || typeof gear !== "object") { skipped++; return; }
+        if (!gear.slot || !gear.rarity) { skipped++; return; }
+        if (gear.rarity === "LauSir") { skipped++; return; }
+        if (gear.unbreakable === true && (gear.rarity === "LauSir" ||
+            (typeof gear.shopId === "string" && gear.shopId.startsWith("lausir_")) ||
+            (typeof gear.id === "string" && gear.id.startsWith("lausir_")))) {
+          skipped++; return;
+        }
+        if (typeof gear.shopId === "string" && gear.shopId) {
+          if (shopIds.has(gear.shopId) || gear.shopId.startsWith("lausir_") || gear.shopId.startsWith("shop_")) {
+            skipped++; return;
+          }
+        }
+        if (gear.isCosmetic) { skipped++; return; }
+        // Already migrated / stamped with intentional lootTier in old band or high — still allow classify
+        const est = estimateGearLootTier(gear);
+        if (est == null || !Number.isFinite(est) || est <= 0) { skipped++; return; }
+
+        let best = null; // { kind, rel, ... }
+        for (const b of NEW_ORIG) {
+          const r = relErr(est, b.newLoot);
+          if (r <= TOL && (!best || r < best.rel)) best = { kind: "newOrig", rel: r, ...b };
+        }
+        for (const b of OLD_ORIG) {
+          const r = relErr(est, b.loot);
+          if (r <= TOL && (!best || r < best.rel)) best = { kind: "oldOrig", rel: r, loot: b.loot, dungeonId: b.dungeonId };
+        }
+        for (const b of HIGH) {
+          const r = relErr(est, b.loot);
+          if (r <= TOL && (!best || r < best.rel)) best = { kind: "high", rel: r, loot: b.loot, dungeonId: b.dungeonId };
+        }
+
+        if (!best) { skipped++; return; }
+
+        if (best.kind === "newOrig") {
+          const factor = best.oldLoot / best.newLoot;
+          gear.atk = Math.max(1, Math.round(Number(gear.atk || 0) * factor));
+          gear.def = Math.max(0, Math.round(Number(gear.def || 0) * factor));
+          gear.hp  = Math.max(5, Math.round(Number(gear.hp  || 0) * factor));
+          gear.mp  = Math.max(0, Math.round(Number(gear.mp  || 0) * factor));
+          const sv = Number(gear.sellValue);
+          if (Number.isFinite(sv) && sv > 0) {
+            gear.sellValue = Math.max(1, Math.round(sv * factor));
+          }
+          gear.lootTier = best.oldLoot;
+          gear.sourceDungeonId = best.dungeonId;
+          rescaled++;
+          return;
+        }
+
+        if (best.kind === "oldOrig") {
+          if (gear.lootTier !== best.loot) gear.lootTier = best.loot;
+          if (!gear.sourceDungeonId) gear.sourceDungeonId = best.dungeonId;
+          stamped++;
+          return;
+        }
+
+        // high endgame 6–9 — leave stats; stamp if missing
+        if (gear.lootTier == null) gear.lootTier = best.loot;
+        if (!gear.sourceDungeonId) gear.sourceDungeonId = best.dungeonId;
+        stamped++;
+      };
+
+      for (const stu of dbObj.students) {
+        if (!stu) continue;
+        if (stu.equipped && typeof stu.equipped === "object") {
+          for (const slot of Object.keys(stu.equipped)) processGear(stu.equipped[slot]);
+        }
+        if (Array.isArray(stu.inventory)) {
+          for (const item of stu.inventory) processGear(item);
+        }
+      }
+
+      dbObj.gearLootRetuneV1 = true;
+      dbObj.gearLootRetuneV1Stats = { rescaled, stamped, skipped };
+      try { console.info("[LS Land] gearLootRetuneV1", dbObj.gearLootRetuneV1Stats); } catch (e) {}
+      return true;
+    }
+
     function scaleStatsByRarity(slot, baseSub, rarity, tierScale) {
       const powerMult = RARITY_POWER_MULT[rarity] != null ? RARITY_POWER_MULT[rarity] : 1;
       const blended = blendSubtypeStats(slot, baseSub);
@@ -4582,6 +4729,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         icon: "⚔️",
         recPower: 10000,
         tierMult: 3.5,
+        lootTierMult: 1.12,
         roomsCount: 18,
         biasSlots: ["Weapon"],
         biasDesc: "60% Drop Bias: Weapons",
@@ -4595,6 +4743,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         icon: "💀",
         recPower: 30000,
         tierMult: 8,
+        lootTierMult: 2.45,
         roomsCount: 18,
         biasSlots: ["Helmet", "Chestplate"],
         biasDesc: "60% Drop Bias: Helmets & Chestplates",
@@ -4608,6 +4757,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         icon: "🏰",
         recPower: 55000,
         tierMult: 15,
+        lootTierMult: 4.8,
         roomsCount: 20,
         biasSlots: ["Shield", "Gauntlets/Boots"],
         biasDesc: "60% Drop Bias: Shields & Boots",
@@ -4621,6 +4771,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         icon: "🔮",
         recPower: 80000,
         tierMult: 27,
+        lootTierMult: 8.5,
         roomsCount: 22,
         biasSlots: ["Accessory", "Weapon"],
         biasDesc: "60% Drop Bias: Accessories & Weapons",
@@ -4634,6 +4785,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         icon: "🐉",
         recPower: 100000,
         tierMult: 46,
+        lootTierMult: 14.5,
         roomsCount: 24,
         biasSlots: ["Weapon", "Chestplate", "Accessory"],
         biasDesc: "60% Drop Bias: Sovereign Relics",
@@ -4647,6 +4799,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         icon: "⛈️",
         recPower: 120000,
         tierMult: 55,
+        lootTierMult: 55,
         roomsCount: 26,
         biasSlots: ["Weapon", "Shield"],
         biasDesc: "60% Drop Bias: Storm Arms & Shields",
@@ -4660,6 +4813,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         icon: "🕳️",
         recPower: 280000,
         tierMult: 120,
+        lootTierMult: 120,
         roomsCount: 28,
         biasSlots: ["Helmet", "Accessory", "Chestplate"],
         biasDesc: "60% Drop Bias: Void Relics",
@@ -4673,6 +4827,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         icon: "🔨",
         recPower: 550000,
         tierMult: 220,
+        lootTierMult: 220,
         roomsCount: 30,
         biasSlots: ["Gauntlets/Boots", "Chestplate", "Weapon"],
         biasDesc: "60% Drop Bias: Titan-Forged Plate",
@@ -4686,6 +4841,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         icon: "⚜️",
         recPower: 900000,
         tierMult: 350,
+        lootTierMult: 350,
         roomsCount: 32,
         biasSlots: ["Weapon", "Accessory", "Chestplate", "Shield"],
         biasDesc: "60% Drop Bias: Guild Relics (Rare+ only)",
@@ -5053,6 +5209,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
     if (!Array.isArray(db.deletedStudentIds)) db.deletedStudentIds = [];
     let _dbMigrated = migrateGearNames(db);
     if (migrateLauSirCertifiedStats(db)) _dbMigrated = true;
+    if (migrateGearLootRetune(db)) _dbMigrated = true;
     if (_dbMigrated) {
       try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch (e) {}
     }
@@ -5321,6 +5478,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       }
       migrateGearNames(db);
       migrateLauSirCertifiedStats(db);
+      migrateGearLootRetune(db);
       try {
         localStorage.setItem(DB_KEY, JSON.stringify(db));
       } catch (e) {}
@@ -6100,6 +6258,14 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       return chosen;
     }
 
+    function getDungeonLootTier(dungeon) {
+      if (!dungeon) return null;
+      if (dungeon.lootTierMult != null && Number.isFinite(Number(dungeon.lootTierMult))) {
+        return Number(dungeon.lootTierMult);
+      }
+      return Number(dungeon.tierMult) || 1;
+    }
+
     function generateGearDrop(dungeon = null, isCosmetic = false, forceMinRarity = null) {
       const stu = getActiveStudent();
       let slot = GEAR_SLOTS[Math.floor(Math.random() * GEAR_SLOTS.length)];
@@ -6112,7 +6278,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       const minRarity = forceMinRarity || (dungeon && dungeon.minDropRarity) || null;
       const rarity = rollRarity(minRarity);
 
-      const tierScale = dungeon ? dungeon.tierMult : Math.max(1, stu.level * 0.22);
+      const tierScale = dungeon ? getDungeonLootTier(dungeon) : Math.max(1, stu.level * 0.22);
       const subPool = GEAR_SUBTYPES[slot];
       const baseSub = subPool[Math.floor(Math.random() * subPool.length)];
 
@@ -6138,6 +6304,8 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         durability: 100,
         maxDurability: 100,
         isCosmetic: isCosmetic,
+        lootTier: +Number(tierScale).toFixed(4),
+        sourceDungeonId: dungeon ? dungeon.id : null,
         // Resell: Common 1x, Rare 3x, Exotic 8x, Legendary 20x vs base
         sellValue: getSellValueForRarity(25, rarity, tierScale)
       };
