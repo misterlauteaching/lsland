@@ -906,6 +906,9 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
       <button type="button" data-tab="classes" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition flex items-center gap-1.5 bg-slate-800/90 text-slate-300 hover:bg-slate-700">
         <span>👑</span> 20 Social Classes
       </button>
+      <button type="button" data-tab="leaderboard" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition flex items-center gap-1.5 bg-slate-800/90 text-slate-300 hover:bg-slate-700">
+        <span>🏆</span> Leaderboard
+      </button>
       <button type="button" data-tab="teacher" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow">
         <span>🎓</span> Teacher Portal
       </button>
@@ -3044,7 +3047,56 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
     </section>
 
     <!-- ==========================================
-         TAB 7: TEACHER ADMIN / AWARD PORTAL
+         TAB 7: CLASSROOM LEADERBOARD (STUDENT-FACING)
+         ========================================== -->
+    <section id="tab-leaderboard" class="tab-panel hidden space-y-4">
+      <div class="bg-slate-900/95 border border-amber-500/40 rounded-2xl p-4 space-y-3 shadow-xl">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="font-medieval text-lg font-bold text-amber-300">🏆 Hall of Heroes — Classroom Leaderboard</h2>
+            <p class="text-xs text-slate-400">See how the realm ranks. Default order is Social Class, then Classroom Points (CP). Your own hero is highlighted when logged in.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span id="leaderboardStudentCount" class="text-xs font-bold text-amber-300 bg-amber-950/80 px-2.5 py-1 rounded-full border border-amber-500/30">0 Heroes</span>
+            <button id="btnLeaderboardRefreshCloud" type="button" class="px-2.5 py-1 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-[11px] transition" title="Pull latest roster from Cloud Sync">
+              ⟳ Refresh Cloud
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span class="text-[11px] text-slate-400 font-semibold mr-1">Sort by:</span>
+          <button type="button" data-lb-sort="class" class="lb-sort-btn px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 font-extrabold text-[11px] transition">Social Class</button>
+          <button type="button" data-lb-sort="cp" class="lb-sort-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold text-[11px] transition">CP</button>
+          <button type="button" data-lb-sort="level" class="lb-sort-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold text-[11px] transition">Level</button>
+          <button type="button" data-lb-sort="gold" class="lb-sort-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold text-[11px] transition">Gold</button>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl border border-slate-800">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-950/90 text-slate-400 border-b border-slate-800">
+                <th class="py-2.5 px-2 font-bold w-12">#</th>
+                <th class="py-2.5 px-2 font-bold">Hero</th>
+                <th class="py-2.5 px-2 font-bold">Social Class</th>
+                <th class="py-2.5 px-2 font-bold">Level</th>
+                <th class="py-2.5 px-2 font-bold">CP</th>
+                <th class="py-2.5 px-2 font-bold">Gold</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardTableBody" class="divide-y divide-slate-800/70">
+              <tr>
+                <td colspan="6" class="py-8 text-center text-xs text-slate-400">Loading classroom roster…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-[10px] text-slate-500">PIN codes are never shown on this board. Rankings update after Cloud Refresh or when the teacher syncs awards.</p>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         TAB 8: TEACHER ADMIN / AWARD PORTAL
          ========================================== -->
     <section id="tab-teacher" class="tab-panel space-y-4">
       <!-- Teacher PIN Gate -->
@@ -5407,6 +5459,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
     // 4. RUNTIME DUNGEON & COMBAT STATE (PRESERVED ACROSS TAB SWITCHING!)
     // =========================================================================
     let activeTab = "world";
+    let leaderboardSortMode = "class"; // class | cp | level | gold
     let teacherUnlocked = false;
 
     let currentDungeon = null;
@@ -7164,6 +7217,65 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       }).join("");
     }
 
+    function renderLeaderboard() {
+      const body = document.getElementById("leaderboardTableBody");
+      const countEl = document.getElementById("leaderboardStudentCount");
+      if (!body) return;
+
+      document.querySelectorAll(".lb-sort-btn").forEach(btn => {
+        const mode = btn.getAttribute("data-lb-sort");
+        const active = mode === leaderboardSortMode;
+        btn.className = active
+          ? "lb-sort-btn px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 font-extrabold text-[11px] transition"
+          : "lb-sort-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold text-[11px] transition";
+      });
+
+      const students = Array.isArray(db.students) ? [...db.students] : [];
+      if (countEl) countEl.textContent = `${students.length} Hero${students.length === 1 ? "" : "es"}`;
+
+      if (students.length === 0) {
+        body.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-8 text-center text-xs text-slate-400">
+              No heroes on the roster yet. Ask your Teacher to create characters, or hit <strong>Refresh Cloud</strong>.
+            </td>
+          </tr>`;
+        return;
+      }
+
+      const mode = leaderboardSortMode || "class";
+      students.sort((a, b) => {
+        const aRank = a.classRank || 1, bRank = b.classRank || 1;
+        const aCp = a.cp || 0, bCp = b.cp || 0;
+        const aLv = a.level || 1, bLv = b.level || 1;
+        const aGold = a.gold || 0, bGold = b.gold || 0;
+        const byName = String(a.name || "").localeCompare(String(b.name || ""), undefined, { sensitivity: "base" });
+        if (mode === "cp") return (bCp - aCp) || (bRank - aRank) || (bLv - aLv) || byName;
+        if (mode === "level") return (bLv - aLv) || (bRank - aRank) || (bCp - aCp) || byName;
+        if (mode === "gold") return (bGold - aGold) || (bRank - aRank) || (bCp - aCp) || byName;
+        // default: Social Class (higher rank first), then CP
+        return (bRank - aRank) || (bCp - aCp) || (bLv - aLv) || byName;
+      });
+
+      const medal = (n) => n === 1 ? "🥇" : n === 2 ? "🥈" : n === 3 ? "🥉" : String(n);
+      body.innerHTML = students.map((s, idx) => {
+        const rankNum = idx + 1;
+        const cObj = getSocialClassObj(s.classRank);
+        const isYou = s.id && s.id === db.activeStudentId;
+        return `
+          <tr class="${isYou ? "bg-amber-500/15 ring-1 ring-inset ring-amber-400/40" : "hover:bg-slate-950/60"}">
+            <td class="py-2.5 px-2 font-extrabold ${rankNum <= 3 ? "text-amber-300" : "text-slate-300"}">${medal(rankNum)}</td>
+            <td class="py-2.5 px-2 font-bold text-white">
+              ${s.name || "Unknown"}${isYou ? ' <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 ml-1">You</span>' : ""}
+            </td>
+            <td class="py-2.5 px-2 text-amber-300 font-semibold">#${cObj.id} ${cObj.name}</td>
+            <td class="py-2.5 px-2"><strong class="text-emerald-400">Lv. ${s.level || 1}</strong></td>
+            <td class="py-2.5 px-2 text-cyan-300 font-bold">${s.cp || 0}</td>
+            <td class="py-2.5 px-2 text-amber-200 font-semibold">${s.gold || 0} 🪙</td>
+          </tr>`;
+      }).join("");
+    }
+
     function renderTeacherPortal() {
       document.getElementById("teacherPinGate").classList.toggle("hidden", teacherUnlocked);
       document.getElementById("teacherDashboard").classList.toggle("hidden", !teacherUnlocked);
@@ -7277,6 +7389,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       renderTrainingPortal();
       renderQuestsAndStory();
       renderSocialClassesTab();
+      renderLeaderboard();
       renderTeacherPortal();
     }
 
@@ -7959,6 +8072,24 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         }
         await pullFromCloud(false, false);
         renderAccountModalList();
+      });
+
+      document.querySelectorAll(".lb-sort-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          leaderboardSortMode = btn.getAttribute("data-lb-sort") || "class";
+          playSfx("click");
+          renderLeaderboard();
+        });
+      });
+      document.getElementById("btnLeaderboardRefreshCloud")?.addEventListener("click", async () => {
+        if (!cloudConfig.enabled || !cloudConfig.endpoint) {
+          renderLeaderboard();
+          return showToast("Cloud Sync is not configured yet! Showing local roster. Ask your Teacher for the Invite Link.", "rose");
+        }
+        playSfx("click");
+        await pullFromCloud(false, false);
+        renderLeaderboard();
+        showToast("🏆 Leaderboard refreshed from Cloud!", "emerald");
       });
 
       document.getElementById("btnCopyCloudShareUrl").addEventListener("click", () => {
