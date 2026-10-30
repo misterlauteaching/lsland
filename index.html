@@ -981,16 +981,17 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
               <button id="btnClaimDailyAllowance" type="button" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg border border-amber-200 transition flex items-center gap-1.5"><span>🎁</span> Claim Class Allowance (Every 6h)</button>
             </div>
           </div>
-
-          <!-- Interactive Map Pins Overlay -->
-          <div class="absolute bottom-3 left-3 right-3">
-            <div class="flex items-center justify-between mb-2">
-              <h2 class="font-medieval text-lg sm:text-xl font-bold text-amber-300 drop-shadow">🏰 Select a Dungeon to Conquer (Open dungeons unlocked Day 1)</h2>
-              <span class="text-xs bg-slate-950/80 px-2.5 py-1 rounded-full text-slate-300 border border-slate-700">Your Gear Power: <strong id="worldGearPowerBadge" class="text-amber-400">455</strong> ⚡</span>
-            </div>
-            <div id="dungeonCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-2.5">
-          <!-- Dungeon cards rendered by renderWorldAndDungeon() from DUNGEONS -->
         </div>
+
+        <!-- Dungeon Progression Ladder (document flow — page scrolls normally) -->
+        <div class="bg-slate-900/90 border-2 border-amber-500/40 rounded-2xl p-3 sm:p-4 shadow-xl">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <h2 class="font-medieval text-lg sm:text-xl font-bold text-amber-300 drop-shadow">🏰 Dungeon Progression</h2>
+            <span class="text-xs bg-slate-950/80 px-2.5 py-1 rounded-full text-slate-300 border border-slate-700">Your Gear Power: <strong id="worldGearPowerBadge" class="text-amber-400">455</strong> ⚡</span>
+          </div>
+          <p class="text-[11px] text-slate-400 mb-3">Climb 1→9 from the Armory to Guild Sanctum. Open dungeons unlocked Day 1 · Sanctum needs Class Rank 13+.</p>
+          <div id="dungeonCardsGrid" class="flex flex-col gap-2 relative">
+            <!-- Dungeon cards rendered by renderWorldAndDungeon() from DUNGEONS -->
           </div>
         </div>
 
@@ -6917,7 +6918,9 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       document.getElementById("worldCurrentQuestDesc").textContent = nextMq.desc;
 
       const grid = document.getElementById("dungeonCardsGrid");
-      grid.innerHTML = DUNGEONS.map(d => {
+      const totalD = DUNGEONS.length;
+      grid.innerHTML = DUNGEONS.map((d, idx) => {
+        const step = idx + 1;
         const powerDiff = stats.gearPower >= d.recPower;
         const clears = stu.ClearedDungeons[d.id] || 0;
         const rewardPct = Math.round(getDungeonRewardEfficiency(stu, d.id) * 100);
@@ -6927,37 +6930,55 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         for (let i = 0; i < d.roomsCount; i++) {
           if (stu.exploredRooms[`${d.id}_${i}`]) exploredInD++;
         }
-        const borderCls = classLocked
+        // Intensity climbs with ladder step (amber → rose → purple)
+        const intensity = Math.min(1, (step - 1) / Math.max(1, totalD - 1));
+        const borderAccent = classLocked
+          ? 'border-l-slate-500'
+          : (intensity < 0.35 ? 'border-l-amber-500' : intensity < 0.7 ? 'border-l-orange-500' : 'border-l-fuchsia-500');
+        const rowBorder = classLocked
           ? 'border-slate-600/60'
-          : (powerDiff ? 'border-amber-500/50 hover:border-amber-400' : 'border-rose-500/50 hover:border-rose-400');
+          : (powerDiff ? 'border-amber-500/40 hover:border-amber-400/70' : 'border-rose-500/40 hover:border-rose-400/70');
         const recBadge = classLocked
           ? 'bg-slate-800 text-slate-400 border border-slate-600'
           : (powerDiff ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40');
+        const numBadge = classLocked
+          ? 'bg-slate-800 text-slate-400 border-slate-600'
+          : (intensity < 0.35 ? 'bg-amber-500/25 text-amber-200 border-amber-500/50' : intensity < 0.7 ? 'bg-orange-500/25 text-orange-200 border-orange-500/50' : 'bg-fuchsia-500/25 text-fuchsia-200 border-fuchsia-500/50');
         const btnHtml = classLocked
-          ? `<button type="button" disabled class="w-full py-1.5 rounded-lg bg-slate-800 text-slate-500 font-extrabold text-xs cursor-not-allowed">🔒 Requires Rank ${d.minClassRank}+ (${needCls.name})</button>`
-          : `<button type="button" data-enter-dungeon="${d.id}" class="w-full py-1.5 rounded-lg ${powerDiff ? 'bg-amber-500 hover:bg-amber-400 text-slate-950' : 'bg-rose-700 hover:bg-rose-600 text-white'} font-extrabold text-xs transition shadow">
+          ? `<button type="button" disabled class="w-full sm:w-auto min-w-[9.5rem] px-3 py-2.5 sm:py-2 rounded-lg bg-slate-800 text-slate-500 font-extrabold text-xs cursor-not-allowed">🔒 Rank ${d.minClassRank}+ (${needCls.name})</button>`
+          : `<button type="button" data-enter-dungeon="${d.id}" class="w-full sm:w-auto min-w-[9.5rem] px-3 py-2.5 sm:py-2 rounded-lg ${powerDiff ? 'bg-amber-500 hover:bg-amber-400 text-slate-950' : 'bg-rose-700 hover:bg-rose-600 text-white'} font-extrabold text-xs transition shadow">
                 ${powerDiff ? '⚔️ Enter Maze' : '⚠️ Enter (Deadly!)'}
               </button>`;
+        const connector = step < totalD
+          ? `<div class="absolute left-[1.15rem] top-full w-0.5 h-2.5 bg-gradient-to-b from-amber-500/50 to-transparent pointer-events-none z-0" aria-hidden="true"></div>`
+          : '';
         return `
-          <div class="bg-slate-950/90 backdrop-blur-md border ${borderCls} rounded-xl p-3 flex flex-col justify-between transition shadow-lg ${classLocked ? 'opacity-80' : ''}">
-            <div>
-              <div class="flex items-center justify-between gap-1">
-                <span class="text-xl">${d.icon}</span>
-                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded ${recBadge}">
-                  Rec. Power: ${d.recPower.toLocaleString()}
-                </span>
+          <div class="relative z-[1]">
+            <div class="bg-slate-950/95 border ${rowBorder} border-l-4 ${borderAccent} rounded-xl p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center gap-3 transition shadow-lg ${classLocked ? 'opacity-80' : ''}">
+              <div class="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+                <div class="relative shrink-0 flex flex-col items-center">
+                  <span class="w-9 h-9 rounded-full border-2 ${numBadge} flex items-center justify-center text-sm font-black shadow">${step}</span>
+                  ${connector}
+                </div>
+                <span class="text-2xl shrink-0 leading-none mt-0.5 sm:mt-0">${d.icon}</span>
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <h3 class="font-medieval text-sm sm:text-base font-bold text-white truncate">${d.name}</h3>
+                    <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded ${recBadge}">Rec. ${d.recPower.toLocaleString()} ⚡</span>
+                    <span class="text-[10px] font-bold ${rewardPct < 100 ? 'text-amber-300' : 'text-emerald-300'}">Rewards ${rewardPct}%</span>
+                  </div>
+                  <p class="text-[11px] text-amber-300/90 font-semibold mt-0.5 truncate">${d.biasDesc}</p>
+                  <p class="text-[11px] text-slate-400 mt-0.5 line-clamp-2">${classLocked ? `🔒 Locked — reach Social Class Rank ${d.minClassRank} (${needCls.name}) to enter.` : d.lore}</p>
+                  <div class="flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-slate-500 mt-1">
+                    <span>${d.roomsCount} chambers</span>
+                    <span>Explored ${exploredInD}/${d.roomsCount}</span>
+                    <span>Cleared ${clears}×</span>
+                  </div>
+                </div>
               </div>
-              <h3 class="font-medieval text-sm font-bold text-white mt-1.5">${d.name}</h3>
-              <p class="text-[11px] text-amber-300 font-semibold mt-0.5">${d.biasDesc}</p>
-              <p class="text-[11px] text-slate-400 mt-1 line-clamp-2">${classLocked ? `🔒 Elite dungeon locked. Reach Social Class Rank ${d.minClassRank} (${needCls.name}) to enter.` : d.lore}</p>
-            </div>
-            <div class="mt-3 pt-2 border-t border-slate-800/80 space-y-1.5">
-              <div class="flex justify-between text-[10px] text-slate-400">
-                <span>Maze Depth: ${d.roomsCount} Chambers</span>
-                <span>Conquered: ${clears}x</span>
+              <div class="sm:shrink-0 w-full sm:w-auto pt-1 sm:pt-0 border-t border-slate-800/80 sm:border-0">
+                ${btnHtml}
               </div>
-              <div class="text-[10px] font-bold ${rewardPct < 100 ? 'text-amber-300' : 'text-emerald-300'}">Rewards: ${rewardPct}%</div>
-              ${btnHtml}
             </div>
           </div>
         `;
