@@ -596,7 +596,8 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
 })();</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Chronicles of the LS Land — Classroom RPG</title>
+  <title>Chronicles of the LS Land v1.1 — Classroom RPG</title>
+  <!-- Chronicles of LS Land v1.1: auto-return + diminishing dungeon rewards, endgame dungeons (tempest/voidcathedral/titanforge + guildsanctum Class 13 Rare+), Lau Sir Certified CP shop set (Class 16+), permanent gear break at 0% durability -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&amp;family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
   <style>
@@ -710,6 +711,22 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
       border-color: #fbbf24 !important;
       background: linear-gradient(145deg, rgba(120,53,15,0.75), rgba(69,26,3,0.92), rgba(24,24,27,0.95));
       animation: legendaryPulse 2.2s infinite ease-in-out;
+      position: relative;
+    }
+    @keyframes lauSirPulse {
+      0%, 100% {
+        box-shadow: 0 0 16px #fbbf24, 0 0 32px rgba(212, 175, 55, 0.7), 0 0 48px rgba(255, 215, 0, 0.35), inset 0 0 14px rgba(255, 236, 179, 0.4);
+        border-color: #ffd700;
+      }
+      50% {
+        box-shadow: 0 0 28px #ffd700, 0 0 52px rgba(255, 215, 0, 0.95), 0 0 70px rgba(184, 134, 11, 0.55), inset 0 0 22px rgba(255, 250, 205, 0.65);
+        border-color: #fff8dc;
+      }
+    }
+    .rarity-LauSir {
+      border-color: #ffd700 !important;
+      background: linear-gradient(145deg, rgba(120, 53, 15, 0.9), rgba(69, 26, 3, 0.95), rgba(24, 16, 8, 0.98));
+      animation: lauSirPulse 2s infinite ease-in-out;
       position: relative;
     }
     @keyframes royalAuraGlow {
@@ -968,124 +985,11 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
           <!-- Interactive Map Pins Overlay -->
           <div class="absolute bottom-3 left-3 right-3">
             <div class="flex items-center justify-between mb-2">
-              <h2 class="font-medieval text-lg sm:text-xl font-bold text-amber-300 drop-shadow">🏰 Select a Dungeon to Conquer (All Unlocked Day 1)</h2>
+              <h2 class="font-medieval text-lg sm:text-xl font-bold text-amber-300 drop-shadow">🏰 Select a Dungeon to Conquer (Open dungeons unlocked Day 1)</h2>
               <span class="text-xs bg-slate-950/80 px-2.5 py-1 rounded-full text-slate-300 border border-slate-700">Your Gear Power: <strong id="worldGearPowerBadge" class="text-amber-400">455</strong> ⚡</span>
             </div>
-            <div id="dungeonCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
-          <div class="bg-slate-950/90 backdrop-blur-md border border-amber-500/50 hover:border-amber-400 rounded-xl p-3 flex flex-col justify-between transition shadow-lg">
-            <div>
-              <div class="flex items-center justify-between gap-1">
-                <span class="text-xl">⚔️</span>
-                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                  Rec. Power: 220
-                </span>
-              </div>
-              <h3 class="font-medieval text-sm font-bold text-white mt-1.5">1. Forgotten Armory</h3>
-              <p class="text-[11px] text-amber-300 font-semibold mt-0.5">60% Drop Bias: Weapons</p>
-              <p class="text-[11px] text-slate-400 mt-1 line-clamp-2">An overgrown royal smithy seized by ruthless marauders and wild beasts. Challenging yet rewarding!</p>
-            </div>
-            <div class="mt-3 pt-2 border-t border-slate-800/80 space-y-1.5">
-              <div class="flex justify-between text-[10px] text-slate-400">
-                <span>Maze Depth: 18 Chambers</span>
-                <span>Conquered: 0x</span>
-              </div>
-              <button type="button" data-enter-dungeon="armory" class="w-full py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition shadow">
-                ⚔️ Enter Maze
-              </button>
-            </div>
-          </div>
-        
-          <div class="bg-slate-950/90 backdrop-blur-md border border-rose-500/50 hover:border-rose-400 rounded-xl p-3 flex flex-col justify-between transition shadow-lg">
-            <div>
-              <div class="flex items-center justify-between gap-1">
-                <span class="text-xl">💀</span>
-                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                  Rec. Power: 580
-                </span>
-              </div>
-              <h3 class="font-medieval text-sm font-bold text-white mt-1.5">2. Cursed Catacombs</h3>
-              <p class="text-[11px] text-amber-300 font-semibold mt-0.5">60% Drop Bias: Helmets &amp; Chestplates</p>
-              <p class="text-[11px] text-slate-400 mt-1 line-clamp-2">Eerie emerald-lit burial vaults beneath the old abbey where lethal undead guard the Second Shard.</p>
-            </div>
-            <div class="mt-3 pt-2 border-t border-slate-800/80 space-y-1.5">
-              <div class="flex justify-between text-[10px] text-slate-400">
-                <span>Maze Depth: 18 Chambers</span>
-                <span>Conquered: 0x</span>
-              </div>
-              <button type="button" data-enter-dungeon="catacombs" class="w-full py-1.5 rounded-lg bg-rose-700 hover:bg-rose-600 text-white font-extrabold text-xs transition shadow">
-                ⚠️ Enter (Deadly!)
-              </button>
-            </div>
-          </div>
-        
-          <div class="bg-slate-950/90 backdrop-blur-md border border-rose-500/50 hover:border-rose-400 rounded-xl p-3 flex flex-col justify-between transition shadow-lg">
-            <div>
-              <div class="flex items-center justify-between gap-1">
-                <span class="text-xl">🏰</span>
-                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                  Rec. Power: 1250
-                </span>
-              </div>
-              <h3 class="font-medieval text-sm font-bold text-white mt-1.5">3. Ironclad Keep</h3>
-              <p class="text-[11px] text-amber-300 font-semibold mt-0.5">60% Drop Bias: Shields &amp; Boots</p>
-              <p class="text-[11px] text-slate-400 mt-1 line-clamp-2">A chained fortress of relentless clockwork golems and animated plate armor protecting the Third Shard.</p>
-            </div>
-            <div class="mt-3 pt-2 border-t border-slate-800/80 space-y-1.5">
-              <div class="flex justify-between text-[10px] text-slate-400">
-                <span>Maze Depth: 20 Chambers</span>
-                <span>Conquered: 0x</span>
-              </div>
-              <button type="button" data-enter-dungeon="ironclad" class="w-full py-1.5 rounded-lg bg-rose-700 hover:bg-rose-600 text-white font-extrabold text-xs transition shadow">
-                ⚠️ Enter (Deadly!)
-              </button>
-            </div>
-          </div>
-        
-          <div class="bg-slate-950/90 backdrop-blur-md border border-rose-500/50 hover:border-rose-400 rounded-xl p-3 flex flex-col justify-between transition shadow-lg">
-            <div>
-              <div class="flex items-center justify-between gap-1">
-                <span class="text-xl">🔮</span>
-                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                  Rec. Power: 2250
-                </span>
-              </div>
-              <h3 class="font-medieval text-sm font-bold text-white mt-1.5">4. Abyssal Cavern</h3>
-              <p class="text-[11px] text-amber-300 font-semibold mt-0.5">60% Drop Bias: Accessories &amp; Weapons</p>
-              <p class="text-[11px] text-slate-400 mt-1 line-clamp-2">Deep luminescent crystal caverns where demonic warlocks siphon mana from the Fourth Shard.</p>
-            </div>
-            <div class="mt-3 pt-2 border-t border-slate-800/80 space-y-1.5">
-              <div class="flex justify-between text-[10px] text-slate-400">
-                <span>Maze Depth: 22 Chambers</span>
-                <span>Conquered: 0x</span>
-              </div>
-              <button type="button" data-enter-dungeon="abyssal" class="w-full py-1.5 rounded-lg bg-rose-700 hover:bg-rose-600 text-white font-extrabold text-xs transition shadow">
-                ⚠️ Enter (Deadly!)
-              </button>
-            </div>
-          </div>
-        
-          <div class="bg-slate-950/90 backdrop-blur-md border border-rose-500/50 hover:border-rose-400 rounded-xl p-3 flex flex-col justify-between transition shadow-lg">
-            <div>
-              <div class="flex items-center justify-between gap-1">
-                <span class="text-xl">🐉</span>
-                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                  Rec. Power: 3900
-                </span>
-              </div>
-              <h3 class="font-medieval text-sm font-bold text-white mt-1.5">5. Dragon's Citadel</h3>
-              <p class="text-[11px] text-amber-300 font-semibold mt-0.5">60% Drop Bias: Sovereign Relics</p>
-              <p class="text-[11px] text-slate-400 mt-1 line-clamp-2">The volcanic throne peak of LS Land! Walk in unprepared at Level 1 and Ignisaur will incinerate you instantly.</p>
-            </div>
-            <div class="mt-3 pt-2 border-t border-slate-800/80 space-y-1.5">
-              <div class="flex justify-between text-[10px] text-slate-400">
-                <span>Maze Depth: 24 Chambers</span>
-                <span>Conquered: 0x</span>
-              </div>
-              <button type="button" data-enter-dungeon="citadel" class="w-full py-1.5 rounded-lg bg-rose-700 hover:bg-rose-600 text-white font-extrabold text-xs transition shadow">
-                ⚠️ Enter (Deadly!)
-              </button>
-            </div>
-          </div>
+            <div id="dungeonCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-2.5">
+          <!-- Dungeon cards rendered by renderWorldAndDungeon() from DUNGEONS -->
         </div>
           </div>
         </div>
@@ -1324,7 +1228,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
                 <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400">📜 Battle &amp; Exploration Chronicle</h4>
                 <button id="btnClearCombatLog" type="button" class="text-[11px] text-slate-400 hover:text-white">Clear</button>
               </div>
-              <div id="adventureLogContainer" class="flex-1 overflow-y-auto space-y-1.5 text-xs pr-1 font-mono"><div class="text-amber-300 leading-snug border-b border-slate-800/60 pb-1">👑 Welcome to Chronicles of the LS Land! All 5 Dungeons are unlocked. Check your Loadout or enter the Forgotten Armory!</div>
+              <div id="adventureLogContainer" class="flex-1 overflow-y-auto space-y-1.5 text-xs pr-1 font-mono"><div class="text-amber-300 leading-snug border-b border-slate-800/60 pb-1">👑 Welcome to Chronicles of the LS Land v1.1! Open dungeons await — conquer them, then face the elite Guild Sanctum (Class Rank 13+). Check your Loadout or enter the Forgotten Armory!</div>
                 <!-- Log messages -->
               </div>
             </div>
@@ -1600,6 +1504,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
                 </select>
                 <select id="invFilterRarity" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
                   <option value="ALL">All Rarities</option>
+                  <option value="LauSir">👑 Lau Sir Certified</option>
                   <option value="Legendary">🟧 Legendary (0.3%)</option>
                   <option value="Exotic">🟪 Exotic (2.0%)</option>
                   <option value="Rare">🟦 Rare (25%)</option>
@@ -2028,7 +1933,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
           <div class="flex items-center justify-between">
             <div>
               <h2 class="font-medieval text-lg font-bold text-amber-300">🔨 Master Grom • Gear Artisan</h2>
-              <p class="text-xs text-slate-400">Combat wears down gear durability. Damaged gear loses power at &lt;50% durability and breaks at 0%!</p>
+              <p class="text-xs text-slate-400">Combat wears down gear durability. Damaged gear loses power at &lt;50%. At 0% it <strong>permanently shatters</strong> — unequipped, unusable, unrepairable (scrap sell only)!</p>
             </div>
             <span class="text-3xl">👨‍🏭</span>
           </div>
@@ -4354,10 +4259,22 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
     };
 
     // Rarity sell multipliers vs a shared base sell value
-    const RARITY_SELL_MULT = { Common: 1, Rare: 3, Exotic: 8, Legendary: 20 };
+    const RARITY_SELL_MULT = { Common: 1, Rare: 3, Exotic: 8, Legendary: 20, LauSir: 50 };
     // Power multipliers — gaps large enough that Legendary > Exotic > Rare > Common always
     // (after blending subtype stats toward slot averages to limit intra-slot variance)
-    const RARITY_POWER_MULT = { Common: 1.0, Rare: 1.6, Exotic: 2.55, Legendary: 4.1 };
+    const RARITY_POWER_MULT = { Common: 1.0, Rare: 1.6, Exotic: 2.55, Legendary: 4.1, LauSir: 20.0 };
+    function rarityDisplayName(rarity) {
+      if (rarity === "LauSir") return "Lau Sir Certified";
+      return rarity || "Common";
+    }
+    /** Scrap sell for permanently broken gear (5% of normal sell, min 1). */
+    function getBrokenScrapSellValue(item) {
+      return Math.max(1, Math.floor((item && item.sellValue != null ? item.sellValue : 15) * 0.05));
+    }
+    function getDungeonRewardEfficiency(stu, dungeonId) {
+      const clearCount = (stu && stu.ClearedDungeons && stu.ClearedDungeons[dungeonId]) || 0;
+      return Math.max(0.01, +(1.0 - clearCount * 0.10).toFixed(2));
+    }
     const COMMON_MATERIALS = ["Iron", "Steel", "Bronze", "Oak", "Leather", "Bone", "Copper", "Stone", "Hide", "Tin"];
     const RARE_ADJECTIVES = ["Refined", "Advanced", "Polished", "Tempered", "Reinforced", "Hardened"];
     const EXOTIC_NAME_FLAIR = [
@@ -4607,6 +4524,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       { id: "elder_dragon", name: "Elder Crimson Dragon", category: "Dragons", color: "#fbbf24", baseHp: 910, baseAtk: 182, baseDef: 82 }
     ];
 
+    // v1.1 — endgame dungeons scaled for ~70k+ gearPower players (citadel recPower 3900 is mid-game now)
     const DUNGEONS = [
       {
         id: "armory",
@@ -4672,6 +4590,60 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         monsterPool: ["wyvern", "elder_dragon", "hellhound", "imp_warlock", "animated_armour"],
         boss: { name: "Ignisaur the Elder Sovereign", category: "Dragons", color: "#fbbf24", hp: 15800, atk: 980, def: 450 },
         lore: "The volcanic throne peak of LS Land! Walk in unprepared at Level 1 and Ignisaur will incinerate you instantly."
+      },
+      {
+        id: "tempest",
+        name: "6. Tempest Bastion",
+        icon: "⛈️",
+        recPower: 120000,
+        tierMult: 55,
+        roomsCount: 26,
+        biasSlots: ["Weapon", "Shield"],
+        biasDesc: "60% Drop Bias: Storm Arms & Shields",
+        monsterPool: ["wyvern", "elder_dragon", "hellhound", "animated_armour", "orc_berserker"],
+        boss: { name: "Thundrak the Storm Tyrant", category: "Dragons", color: "#38bdf8", hp: 485000, atk: 30000, def: 14000 },
+        lore: "A sky-piercing fortress wreathed in eternal lightning. Only heroes with ~120k Gear Power dare its ramparts."
+      },
+      {
+        id: "voidcathedral",
+        name: "7. Void Cathedral",
+        icon: "🕳️",
+        recPower: 280000,
+        tierMult: 120,
+        roomsCount: 28,
+        biasSlots: ["Helmet", "Accessory", "Chestplate"],
+        biasDesc: "60% Drop Bias: Void Relics",
+        monsterPool: ["cursed_wraith", "imp_warlock", "hellhound", "elder_dragon", "stone_golem"],
+        boss: { name: "Nullarch Vesperyx", category: "Demons", color: "#a855f7", hp: 1150000, atk: 68000, def: 32000 },
+        lore: "A lightless cathedral where reality frays. Void choirs hum and ~280k Gear Power is merely the toll to enter."
+      },
+      {
+        id: "titanforge",
+        name: "8. Titan's Forge",
+        icon: "🔨",
+        recPower: 550000,
+        tierMult: 220,
+        roomsCount: 30,
+        biasSlots: ["Gauntlets/Boots", "Chestplate", "Weapon"],
+        biasDesc: "60% Drop Bias: Titan-Forged Plate",
+        monsterPool: ["stone_golem", "animated_armour", "elder_dragon", "orc_berserker", "hellhound"],
+        boss: { name: "Kharoth the World-Anvil", category: "Constructs", color: "#f97316", hp: 2300000, atk: 135000, def: 62000 },
+        lore: "Primordial forges where world-titans hammer destiny. ~550k Gear Power recommended — lesser steel melts."
+      },
+      {
+        id: "guildsanctum",
+        name: "9. Guild Sanctum of Eternity",
+        icon: "⚜️",
+        recPower: 900000,
+        tierMult: 350,
+        roomsCount: 32,
+        biasSlots: ["Weapon", "Accessory", "Chestplate", "Shield"],
+        biasDesc: "60% Drop Bias: Guild Relics (Rare+ only)",
+        monsterPool: ["elder_dragon", "wyvern", "imp_warlock", "animated_armour", "cursed_wraith"],
+        boss: { name: "Archon Solenne of the Eternal Guild", category: "Humanoid", color: "#fbbf24", hp: 3800000, atk: 220000, def: 98000 },
+        lore: "Elite sanctum of Guild Leaders (Social Class Rank 13+). Drops are Rare or above only — Common is banished.",
+        minClassRank: 13,
+        minDropRarity: "Rare"
       }
     ];
 
@@ -4680,7 +4652,11 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       { id: "mq_2", title: "Ch. 2: Purge the Cursed Catacombs", desc: "Navigate the undead crypts and vanquish Arch-Lich Malakor for the 2nd Shard.", targetDungeon: "catacombs", rewardGold: 600, rewardExp: 300, rewardCP: 15 },
       { id: "mq_3", title: "Ch. 3: Breach the Ironclad Keep", desc: "Shatter the Colossus Vanguard MK-IV inside Ironclad Keep to claim the 3rd Shard.", targetDungeon: "ironclad", rewardGold: 1400, rewardExp: 700, rewardCP: 25 },
       { id: "mq_4", title: "Ch. 4: Light of the Abyssal Cavern", desc: "Banish Azazel the Abyssal Fiend in the crystal depths to secure the 4th Shard.", targetDungeon: "abyssal", rewardGold: 2800, rewardExp: 1500, rewardCP: 40 },
-      { id: "mq_5", title: "Ch. 5: Crown of the LS Sovereign", desc: "Ascend the volcanic Dragon's Citadel and defeat Ignisaur the Elder Sovereign Dragon!", targetDungeon: "citadel", rewardGold: 6000, rewardExp: 3500, rewardCP: 100 }
+      { id: "mq_5", title: "Ch. 5: Crown of the LS Sovereign", desc: "Ascend the volcanic Dragon's Citadel and defeat Ignisaur the Elder Sovereign Dragon!", targetDungeon: "citadel", rewardGold: 6000, rewardExp: 3500, rewardCP: 100 },
+      { id: "mq_6", title: "Ch. 6: Tempest Bastion Rising", desc: "Storm the lightning-wreathed Tempest Bastion and defeat Thundrak the Storm Tyrant!", targetDungeon: "tempest", rewardGold: 18000, rewardExp: 12000, rewardCP: 150 },
+      { id: "mq_7", title: "Ch. 7: Hymn of the Void Cathedral", desc: "Descend into the Void Cathedral and silence Nullarch Vesperyx before the void consumes LS Land.", targetDungeon: "voidcathedral", rewardGold: 45000, rewardExp: 30000, rewardCP: 220 },
+      { id: "mq_8", title: "Ch. 8: Hammer of the Titan's Forge", desc: "Endure the World-Anvil and defeat Kharoth in the Titan's Forge!", targetDungeon: "titanforge", rewardGold: 100000, rewardExp: 70000, rewardCP: 350 },
+      { id: "mq_9", title: "Ch. 9: Eternal Guild Seal", desc: "As Guild Leader (Class Rank 13+), claim the Guild Sanctum of Eternity and defeat Archon Solenne!", targetDungeon: "guildsanctum", rewardGold: 200000, rewardExp: 140000, rewardCP: 500 }
     ];
 
     const SIDE_QUESTS = [
@@ -4690,6 +4666,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       { id: "sq_portal10", title: "Arcane Initiate", desc: "Reach Stage 10 Safety Net in the 1–99 Special Training Portal.", type: "portal", goal: 10, rewardGold: 350, rewardExp: 180, rewardCP: 10 },
       { id: "sq_portal25", title: "Master of the 25th Seal", desc: "Reach Stage 25 Safety Net in the 1–99 Special Training Portal.", type: "portal", goal: 25, rewardGold: 1200, rewardExp: 500, rewardCP: 25 },
       { id: "sq_class5", title: "Rising Citizen of LS", desc: "Earn a promotion to Social Class Rank 5 (Land Owner) or higher via classroom achievements.", type: "classRank", goal: 5, rewardGold: 500, rewardExp: 250, rewardCP: 15 },
+      { id: "sq_class13", title: "Guild Leader's Mandate", desc: "Reach Social Class Rank 13 (Guild Leader) to unlock the elite Guild Sanctum of Eternity dungeon.", type: "classRank", goal: 13, rewardGold: 8000, rewardExp: 4000, rewardCP: 80 },
       { id: "sq_repair5", title: "Artisan's Patron", desc: "Repair damaged gear 5 times at Master Grom's forge.", type: "repairs", goal: 5, rewardGold: 200, rewardExp: 90, rewardCP: 5 }
     ];
 
@@ -4714,7 +4691,14 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       { id: "shop_s1", name: "Dragonward Bulwark", slot: "Shield", icon: "🛡️", rarity: "Exotic", atk: 28, def: 105, hp: 350, mp: 35, traits: ["Scale Shielding", "Thorns"], priceGold: 13500, priceCP: 614 },
       // Legendary — ~25000–40000 gold (was 380–450k)
       { id: "shop_w2", name: "Legendary Greatsword", slot: "Weapon", icon: "🗡️", rarity: "Legendary", atk: 185, def: 65, hp: 420, mp: 95, traits: ["Dragon Slayer", "Vampiric", "Devastation"], priceGold: 28000, priceCP: 1273 },
-      { id: "shop_a1", name: "Legendary Amulet", slot: "Accessory", icon: "💎", rarity: "Legendary", atk: 125, def: 110, hp: 560, mp: 180, traits: ["Fortune's Favor", "Holy Ward", "Executioner"], priceGold: 36000, priceCP: 1636 }
+      { id: "shop_a1", name: "Legendary Amulet", slot: "Accessory", icon: "💎", rarity: "Legendary", atk: 125, def: 110, hp: 560, mp: 180, traits: ["Fortune's Favor", "Holy Ward", "Executioner"], priceGold: 36000, priceCP: 1636 },
+      // v1.1 Easter egg — Lau Sir Certified set (5× best shop piece per slot). CP-only. Visible at classRank >= 16.
+      { id: "lausir_w", name: "Lau Sir Certified Greatsword", slot: "Weapon", icon: "🗡️", rarity: "LauSir", atk: 925, def: 325, hp: 2100, mp: 475, traits: ["Dragon Slayer", "Vampiric", "Devastation"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16 },
+      { id: "lausir_h", name: "Lau Sir Certified Crown", slot: "Helmet", icon: "👑", rarity: "LauSir", atk: 220, def: 290, hp: 975, mp: 425, traits: ["Arcane Surge", "Mana Siphon", "Critical Eye"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16 },
+      { id: "lausir_c", name: "Lau Sir Certified Plate", slot: "Chestplate", icon: "🥋", rarity: "LauSir", atk: 175, def: 440, hp: 1550, mp: 210, traits: ["Fortified", "Vitality", "Scale Shielding"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16 },
+      { id: "lausir_b", name: "Lau Sir Certified Greaves", slot: "Gauntlets/Boots", icon: "🥾", rarity: "LauSir", atk: 150, def: 210, hp: 650, mp: 110, traits: ["Swiftness", "Berserker", "Critical Eye"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16 },
+      { id: "lausir_s", name: "Lau Sir Certified Bulwark", slot: "Shield", icon: "🛡️", rarity: "LauSir", atk: 140, def: 525, hp: 1750, mp: 175, traits: ["Scale Shielding", "Thorns", "Fortified"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16 },
+      { id: "lausir_a", name: "Lau Sir Certified Amulet", slot: "Accessory", icon: "💎", rarity: "LauSir", atk: 625, def: 550, hp: 2800, mp: 900, traits: ["Fortune's Favor", "Holy Ward", "Executioner"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16 }
     ];
 
     const COSMETIC_BOXES = [
@@ -5768,12 +5752,13 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
     }
 
     function computeGearRepairCost(gear, stu = getActiveStudent()) {
-      if (!gear || gear.durability >= 100) return 0;
+      if (!gear || gear.broken || gear.durability <= 0 || gear.durability >= 100) return 0;
       const missing = 100 - gear.durability;
       const isArtisanClass = stu && stu.classRank === 11;
       const discountMult = isArtisanClass ? 0.75 : 1.0;
       // Repair cost per 1% durability scales steeply by Rarity (Exotic & Legendary are much more expensive!)
-      const ratePerPoint = gear.rarity === "Legendary" ? 95 :
+      const ratePerPoint = gear.rarity === "LauSir" ? 200 :
+                           gear.rarity === "Legendary" ? 95 :
                            gear.rarity === "Exotic" ? 28 :
                            gear.rarity === "Rare" ? 6 : 1.5;
       return Math.max(1, Math.ceil(missing * ratePerPoint * discountMult));
@@ -5801,8 +5786,10 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       for (const slot of GEAR_SLOTS) {
         const item = stu.equipped[slot];
         if (!item) continue;
-        if (item.rarity === "Legendary") hasLegendary = true;
-        const durMult = item.durability <= 0 ? 0.1 : (item.durability < 50 ? 0.65 : 1.0);
+        // v1.1: broken / 0% durability contributes nothing
+        if (item.broken || (item.durability != null && item.durability <= 0)) continue;
+        if (item.rarity === "Legendary" || item.rarity === "LauSir") hasLegendary = true;
+        const durMult = item.durability < 50 ? 0.65 : 1.0;
         gearHp  += Math.round((item.hp || 0) * durMult);
         gearAtk += Math.round((item.atk || 0) * durMult);
         gearDef += Math.round((item.def || 0) * durMult);
@@ -5898,11 +5885,12 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       const chestItem = stu.equipped["Chestplate"];
       const helmItem = stu.equipped["Helmet"];
 
-      const chestColor = chestItem?.rarity === "Legendary" ? "#f59e0b" :
+      const chestColor = chestItem?.rarity === "LauSir" ? "#ffd700" :
+                         chestItem?.rarity === "Legendary" ? "#f59e0b" :
                          chestItem?.rarity === "Exotic" ? "#a855f7" :
                          chestItem?.rarity === "Rare" ? "#3b82f6" : "#64748b";
 
-      const weapGlow = weaponItem?.rarity === "Legendary" ? 'filter="url(#legGlow)"' : '';
+      const weapGlow = (weaponItem?.rarity === "Legendary" || weaponItem?.rarity === "LauSir") ? 'filter="url(#legGlow)"' : '';
 
       let hairSvg = "";
       if (hairStyle === 0) {
@@ -5944,8 +5932,8 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       let crownSvg = "";
       if (stu.classRank === 20) {
         crownSvg = `<polygon points="35,24 40,12 50,20 60,12 65,24" fill="#fbbf24" stroke="#b45309" stroke-width="1.5"/>`;
-      } else if (helmItem && helmItem.rarity === "Legendary") {
-        crownSvg = `<polygon points="36,25 42,15 50,21 58,15 64,25" fill="#f59e0b" stroke="#fef08a" stroke-width="1.2"/>`;
+      } else if (helmItem && (helmItem.rarity === "Legendary" || helmItem.rarity === "LauSir")) {
+        crownSvg = `<polygon points="36,25 42,15 50,21 58,15 64,25" fill="${helmItem.rarity === "LauSir" ? "#ffd700" : "#f59e0b"}" stroke="#fef08a" stroke-width="1.2"/>`;
       }
 
       return `
@@ -6032,6 +6020,13 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       if (forceMinRarity === "Exotic" && (rarity === "Common" || rarity === "Rare")) {
         rarity = Math.random() < 0.015 ? "Legendary" : "Exotic";
       }
+      // v1.1: Rare+ floors (e.g. Guild Sanctum) — remaps Common into Rare/Exotic/Legendary
+      if (forceMinRarity === "Rare" && rarity === "Common") {
+        const r = Math.random() * 100;
+        if (r < 1.2) rarity = "Legendary";
+        else if (r < 9) rarity = "Exotic";
+        else rarity = "Rare";
+      }
       return rarity;
     }
 
@@ -6055,7 +6050,8 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         }
       }
 
-      const rarity = rollRarity(forceMinRarity);
+      const minRarity = forceMinRarity || (dungeon && dungeon.minDropRarity) || null;
+      const rarity = rollRarity(minRarity);
 
       const tierScale = dungeon ? dungeon.tierMult : Math.max(1, stu.level * 0.22);
       const subPool = GEAR_SUBTYPES[slot];
@@ -6087,7 +6083,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         sellValue: getSellValueForRarity(25, rarity, tierScale)
       };
 
-      if (rarity === "Legendary") playSfx("legendary");
+      if (rarity === "Legendary" || rarity === "LauSir") playSfx("legendary");
       return item;
     }
 
@@ -6152,6 +6148,20 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       if (!requireLoggedInStudent()) return;
       const dungeon = DUNGEONS.find(d => d.id === dungeonId);
       if (!dungeon) return;
+      const stuGate = getActiveStudent();
+      if (dungeon.minClassRank && (stuGate.classRank || 1) < dungeon.minClassRank) {
+        const need = getSocialClassObj(dungeon.minClassRank);
+        showToast(`🔒 ${dungeon.name} requires Social Class Rank ${dungeon.minClassRank}+ (${need.name})!`, "rose");
+        return;
+      }
+      // Soft warn once if any equipped piece is nearly broken
+      const lowDur = GEAR_SLOTS.some(slot => {
+        const g = stuGate.equipped[slot];
+        return g && !g.broken && g.durability < 15;
+      });
+      if (lowDur) {
+        showToast("⚠️ Some equipped gear is below 15% durability — it will shatter permanently at 0%!", "amber");
+      }
       currentDungeon = dungeon;
       dungeonGraph = buildDungeonMaze(dungeon);
       currentRoomIndex = 0;
@@ -6183,7 +6193,8 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         if (totalDisc % 3 === 0) stu.bonusStats.atk += 1;
         if (totalDisc % 3 === 1) stu.bonusStats.def += 1;
         if (totalDisc % 3 === 2) stu.bonusStats.mp += 1;
-        awardExpAndGold(stu, Math.round(10 * currentDungeon.tierMult), Math.round(5 * currentDungeon.tierMult));
+        const exploreEff = getDungeonRewardEfficiency(stu, currentDungeon.id);
+        awardExpAndGold(stu, Math.round(10 * currentDungeon.tierMult * exploreEff), Math.round(5 * currentDungeon.tierMult * exploreEff));
         appendLog(`✨ Explored deeper into [${room.name}]! Permanent Exploration Bonus: +1 Max HP & +1 Combat Stat!`, "emerald");
       }
 
@@ -6193,13 +6204,14 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         startDungeonMonsterCombat(room);
       } else if (room.type === "treasure" && !room.cleared) {
         room.cleared = true;
-        const goldFound = Math.round((35 + Math.random() * 25) * currentDungeon.tierMult);
+        const treasureEff = getDungeonRewardEfficiency(stu, currentDungeon.id);
+        const goldFound = Math.round((35 + Math.random() * 25) * currentDungeon.tierMult * treasureEff);
         const drop = generateGearDrop(currentDungeon, false);
         stu.inventory.unshift(drop);
-        awardExpAndGold(stu, Math.round(20 * currentDungeon.tierMult), goldFound);
+        awardExpAndGold(stu, Math.round(20 * currentDungeon.tierMult * treasureEff), goldFound);
         playSfx("fanfare");
-        appendLog(`🎁 Treasure Chamber! Found ${goldFound} Gold and [${drop.rarity}] ${drop.name}!`, "amber");
-        showToast(`🎁 Treasure Chest: [${drop.rarity}] ${drop.name}!`, "amber");
+        appendLog(`🎁 Treasure Chamber! Found ${goldFound} Gold and [${rarityDisplayName(drop.rarity)}] ${drop.name}!`, "amber");
+        showToast(`🎁 Treasure Chest: [${rarityDisplayName(drop.rarity)}] ${drop.name}!`, "amber");
       } else if (room.type === "trap" && !room.cleared) {
         room.cleared = true;
         const stats = computeHeroStats(stu);
@@ -6363,8 +6375,16 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       const stu = getActiveStudent();
       for (const slot of GEAR_SLOTS) {
         const g = stu.equipped[slot];
-        if (g && g.durability > 0) {
+        if (g && !g.broken && g.durability > 0) {
           g.durability = Math.max(0, g.durability - amount);
+          if (g.durability <= 0) {
+            g.durability = 0;
+            g.broken = true;
+            stu.equipped[slot] = null;
+            stu.inventory.unshift(g);
+            showToast(`💔 ${g.name} shattered permanently (0% durability)! Sold as scrap only.`, "rose");
+            appendLog(`💔 [${rarityDisplayName(g.rarity)}] ${g.name} broke beyond repair and was unequipped!`, "rose");
+          }
         }
       }
     }
@@ -6550,29 +6570,44 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         const room = dungeonGraph[currentRoomIndex];
         if (room) room.cleared = true;
 
-        const baseGold = Math.round((24 + Math.random() * 18) * currentDungeon.tierMult * (combatState.isBoss ? 3.5 : 1));
-        const baseExp  = Math.round((28 + Math.random() * 14) * currentDungeon.tierMult * (combatState.isBoss ? 3.5 : 1));
-        const classBonusGold = stats.classObj.goldRun;
+        // Efficiency uses clears BEFORE this boss victory increments ClearedDungeons
+        const rewardEff = getDungeonRewardEfficiency(stu, currentDungeon.id);
+        const baseGold = Math.round((24 + Math.random() * 18) * currentDungeon.tierMult * (combatState.isBoss ? 3.5 : 1) * rewardEff);
+        const baseExp  = Math.round((28 + Math.random() * 14) * currentDungeon.tierMult * (combatState.isBoss ? 3.5 : 1) * rewardEff);
+        const classBonusGold = Math.round(stats.classObj.goldRun * rewardEff);
+        const totalGoldAward = baseGold + classBonusGold;
 
-        awardExpAndGold(stu, baseExp, baseGold + classBonusGold);
+        awardExpAndGold(stu, baseExp, totalGoldAward);
 
+        // Gear drops are NEVER diminished by clear efficiency
         const dropChance = (combatState.isBoss ? 1.0 : 0.55) + (stats.traits.includes("Fortune's Favor") ? 0.15 : 0);
         if (Math.random() < dropChance) {
           const item = generateGearDrop(currentDungeon, false);
           stu.inventory.unshift(item);
-          appendLog(`🎁 Looted [${item.rarity}] ${item.name} (${item.slot})!`, item.rarity === "Legendary" ? "amber" : "emerald");
-          showToast(`Looted [${item.rarity}] ${item.name}!`, item.rarity === "Legendary" ? "amber" : "emerald");
+          const isPremium = item.rarity === "Legendary" || item.rarity === "LauSir";
+          appendLog(`🎁 Looted [${rarityDisplayName(item.rarity)}] ${item.name} (${item.slot})!`, isPremium ? "amber" : "emerald");
+          showToast(`Looted [${rarityDisplayName(item.rarity)}] ${item.name}!`, isPremium ? "amber" : "emerald");
         }
 
         if (combatState.isBoss) {
+          const conqueredName = currentDungeon.name;
           stu.ClearedDungeons[currentDungeon.id] = (stu.ClearedDungeons[currentDungeon.id] || 0) + 1;
+          const effPct = Math.round(rewardEff * 100);
+          const effNote = effPct < 100
+            ? `<p class="text-xs text-amber-200 mt-2">📉 Repeat-clear reward efficiency: <strong>${effPct}%</strong> (Gold & EXP diminish 10% per prior clear of this dungeon, floor 1%). Gear drops stay full rate.</p>`
+            : `<p class="text-xs text-emerald-200 mt-2">✨ First clear reward efficiency: <strong>100%</strong>. Further clears diminish Gold & EXP by 10% each (floor 1%).</p>`;
           showRoyalDecreeModal(
             "🏆",
-            `${currentDungeon.name} Conquered!`,
+            `${conqueredName} Conquered!`,
             `<p class="font-bold text-emerald-300">You vanquished ${enemy.name}!</p>
-             <p class="mt-1">Earned <strong>+${baseGold + classBonusGold} Gold</strong> (including +${classBonusGold} ${stats.classObj.name} Class Bonus) and <strong>+${baseExp} EXP</strong>!</p>
-             <p class="text-xs text-amber-300 mt-2">Check the <strong>Quests & Story</strong> tab to claim your Main Campaign Shard reward!</p>`
+             <p class="mt-1">Earned <strong>+${totalGoldAward} Gold</strong> (including class bonus) and <strong>+${baseExp} EXP</strong> at ${effPct}% efficiency!</p>
+             ${effNote}
+             <p class="text-xs text-amber-300 mt-2">Returning to the World Map. Check the <strong>Quests & Story</strong> tab for your campaign reward!</p>`
           );
+          // v1.1: auto-return to world map after boss victory (same as defeat)
+          currentDungeon = null;
+          document.getElementById("dungeonActiveView").classList.add("hidden");
+          document.getElementById("worldMapView").classList.remove("hidden");
         }
       }
 
@@ -6865,31 +6900,44 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       grid.innerHTML = DUNGEONS.map(d => {
         const powerDiff = stats.gearPower >= d.recPower;
         const clears = stu.ClearedDungeons[d.id] || 0;
+        const rewardPct = Math.round(getDungeonRewardEfficiency(stu, d.id) * 100);
+        const classLocked = d.minClassRank && (stu.classRank || 1) < d.minClassRank;
+        const needCls = classLocked ? getSocialClassObj(d.minClassRank) : null;
         let exploredInD = 0;
         for (let i = 0; i < d.roomsCount; i++) {
           if (stu.exploredRooms[`${d.id}_${i}`]) exploredInD++;
         }
+        const borderCls = classLocked
+          ? 'border-slate-600/60'
+          : (powerDiff ? 'border-amber-500/50 hover:border-amber-400' : 'border-rose-500/50 hover:border-rose-400');
+        const recBadge = classLocked
+          ? 'bg-slate-800 text-slate-400 border border-slate-600'
+          : (powerDiff ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40');
+        const btnHtml = classLocked
+          ? `<button type="button" disabled class="w-full py-1.5 rounded-lg bg-slate-800 text-slate-500 font-extrabold text-xs cursor-not-allowed">🔒 Requires Rank ${d.minClassRank}+ (${needCls.name})</button>`
+          : `<button type="button" data-enter-dungeon="${d.id}" class="w-full py-1.5 rounded-lg ${powerDiff ? 'bg-amber-500 hover:bg-amber-400 text-slate-950' : 'bg-rose-700 hover:bg-rose-600 text-white'} font-extrabold text-xs transition shadow">
+                ${powerDiff ? '⚔️ Enter Maze' : '⚠️ Enter (Deadly!)'}
+              </button>`;
         return `
-          <div class="bg-slate-950/90 backdrop-blur-md border ${powerDiff ? 'border-amber-500/50 hover:border-amber-400' : 'border-rose-500/50 hover:border-rose-400'} rounded-xl p-3 flex flex-col justify-between transition shadow-lg">
+          <div class="bg-slate-950/90 backdrop-blur-md border ${borderCls} rounded-xl p-3 flex flex-col justify-between transition shadow-lg ${classLocked ? 'opacity-80' : ''}">
             <div>
               <div class="flex items-center justify-between gap-1">
                 <span class="text-xl">${d.icon}</span>
-                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded ${powerDiff ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'}">
-                  Rec. Power: ${d.recPower}
+                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded ${recBadge}">
+                  Rec. Power: ${d.recPower.toLocaleString()}
                 </span>
               </div>
               <h3 class="font-medieval text-sm font-bold text-white mt-1.5">${d.name}</h3>
               <p class="text-[11px] text-amber-300 font-semibold mt-0.5">${d.biasDesc}</p>
-              <p class="text-[11px] text-slate-400 mt-1 line-clamp-2">${d.lore}</p>
+              <p class="text-[11px] text-slate-400 mt-1 line-clamp-2">${classLocked ? `🔒 Elite dungeon locked. Reach Social Class Rank ${d.minClassRank} (${needCls.name}) to enter.` : d.lore}</p>
             </div>
             <div class="mt-3 pt-2 border-t border-slate-800/80 space-y-1.5">
               <div class="flex justify-between text-[10px] text-slate-400">
                 <span>Maze Depth: ${d.roomsCount} Chambers</span>
                 <span>Conquered: ${clears}x</span>
               </div>
-              <button type="button" data-enter-dungeon="${d.id}" class="w-full py-1.5 rounded-lg ${powerDiff ? 'bg-amber-500 hover:bg-amber-400 text-slate-950' : 'bg-rose-700 hover:bg-rose-600 text-white'} font-extrabold text-xs transition shadow">
-                ${powerDiff ? '⚔️ Enter Maze' : '⚠️ Enter (Deadly!)'}
-              </button>
+              <div class="text-[10px] font-bold ${rewardPct < 100 ? 'text-amber-300' : 'text-emerald-300'}">Rewards: ${rewardPct}%</div>
+              ${btnHtml}
             </div>
           </div>
         `;
@@ -7092,7 +7140,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           <div class="p-2.5 rounded-xl border-2 rarity-${item.rarity} transition relative">
             <div class="flex items-center justify-between text-[10px] font-bold">
               <span class="text-slate-300 uppercase">${slot}</span>
-              <span class="${item.durability < 50 ? 'text-rose-400' : 'text-emerald-400'}">🔧 ${item.durability}%</span>
+              <span class="${item.broken || item.durability <= 0 ? 'text-rose-500' : (item.durability < 50 ? 'text-rose-400' : 'text-emerald-400')}">${item.broken || item.durability <= 0 ? '💔 Broken' : '🔧 ' + item.durability + '%'}</span>
             </div>
             <div class="flex items-center gap-1.5 mt-1">
               <span class="text-lg">${item.icon}</span>
@@ -7155,14 +7203,17 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
             return `<span class="${cls}">${icon}${val}${dStr ? ' ' + dStr : ''}</span>`;
           };
 
+          const isBroken = !!(item.broken || (item.durability != null && item.durability <= 0));
+          if (isBroken) item.broken = true;
+          const sellAmt = isBroken ? getBrokenScrapSellValue(item) : (item.sellValue || 20);
           return `
-          <div data-hover-gear-uid="${item.uid}" class="p-3 rounded-xl border-2 rarity-${item.rarity} flex flex-col justify-between gap-2 cursor-pointer hover:ring-2 hover:ring-amber-400/70 transition">
+          <div data-hover-gear-uid="${item.uid}" class="p-3 rounded-xl border-2 rarity-${item.rarity} flex flex-col justify-between gap-2 cursor-pointer hover:ring-2 hover:ring-amber-400/70 transition ${isBroken ? 'opacity-75' : ''}">
             <div>
               <div class="flex items-center justify-between text-[10px] font-bold uppercase gap-1">
-                <span class="px-2 py-0.5 rounded bg-slate-950/80 text-amber-300">${item.rarity} • ${item.slot}</span>
+                <span class="px-2 py-0.5 rounded bg-slate-950/80 text-amber-300">${rarityDisplayName(item.rarity)} • ${item.slot}</span>
                 <div class="flex items-center gap-1.5">
-                  ${pwrBadge}
-                  <span class="text-emerald-400">🔧 ${item.durability}%</span>
+                  ${isBroken ? '<span class="px-1.5 py-0.5 rounded bg-rose-900/80 border border-rose-500/50 text-rose-200 font-extrabold">💔 Broken</span>' : pwrBadge}
+                  <span class="${isBroken ? 'text-rose-400' : 'text-emerald-400'}">${isBroken ? '0%' : '🔧 ' + item.durability + '%'}</span>
                 </div>
               </div>
               <div class="flex items-center gap-2 mt-1.5">
@@ -7178,14 +7229,14 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
                 </div>
               </div>
               ${item.traits?.length ? `<div class="mt-1.5 flex flex-wrap gap-1">${item.traits.map(t => `<span class="px-2 py-0.5 rounded bg-amber-500/20 border border-amber-400/40 text-[10px] font-bold text-amber-200">★ ${t}</span>`).join("")}</div>` : ''}
-              <div class="mt-1 text-[10px] text-slate-400 italic">🔍 Hover for full comparison table vs. equipped ${item.slot}</div>
+              <div class="mt-1 text-[10px] text-slate-400 italic">${isBroken ? 'Cannot equip or repair — scrap sell only (5% value).' : '🔍 Hover for full comparison table vs. equipped ' + item.slot}</div>
             </div>
             <div class="flex items-center gap-1.5 pt-2 border-t border-slate-800/80">
-              <button type="button" data-equip-uid="${item.uid}" class="flex-1 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition">
-                Equip Now
-              </button>
+              ${isBroken
+                ? `<button type="button" disabled class="flex-1 py-1.5 rounded-lg bg-slate-800 text-slate-500 font-extrabold text-xs cursor-not-allowed">Cannot Equip</button>`
+                : `<button type="button" data-equip-uid="${item.uid}" class="flex-1 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition">Equip Now</button>`}
               <button type="button" data-sell-uid="${item.uid}" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-900 text-slate-200 text-xs font-bold transition">
-                Sell (+${item.sellValue || 20} 🪙)
+                ${isBroken ? `Scrap (+${sellAmt} 🪙)` : `Sell (+${sellAmt} 🪙)`}
               </button>
             </div>
           </div>
@@ -7219,20 +7270,30 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         </div>
       `).join("");
 
-      document.getElementById("shopExclusiveList").innerHTML = SHOP_EXCLUSIVE_ITEMS.map(item => `
+      document.getElementById("shopExclusiveList").innerHTML = SHOP_EXCLUSIVE_ITEMS.filter(item => {
+        if (item.requireClassRank && (stu.classRank || 1) < item.requireClassRank) return false;
+        return true;
+      }).map(item => {
+        const goldBtn = (item.cpOnly || !item.priceGold)
+          ? ``
+          : `<button type="button" data-buy-exclusive-gold="${item.id}" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs">🪙 ${item.priceGold}</button>`;
+        const tag = item.rarity === "LauSir" ? "(Lau Sir Certified • CP Only)"
+          : (item.rarity === "Common" ? "(High-Level Armory)" : "(Shop Exclusive)");
+        return `
         <div data-hover-shop-id="${item.id}" class="p-3 rounded-xl border-2 rarity-${item.rarity} flex items-center justify-between gap-2 cursor-pointer hover:ring-2 hover:ring-amber-400/60 transition">
           <div>
-            <div class="text-[10px] font-bold uppercase text-amber-300">${item.rarity} • ${item.slot} ${item.rarity === 'Common' ? '(High-Level Armory)' : '(Shop Exclusive)'}</div>
+            <div class="text-[10px] font-bold uppercase text-amber-300">${rarityDisplayName(item.rarity)} • ${item.slot} ${tag}</div>
             <div class="text-sm font-extrabold text-white mt-0.5">${item.icon} ${item.name}</div>
             <div class="text-xs text-slate-300">⚔️+${item.atk} 🛡️+${item.def} ❤️+${item.hp} ✨+${item.mp}</div>
             ${item.traits.length ? `<div class="text-[11px] text-amber-200 font-semibold mt-0.5">★ ${item.traits.join(", ")}</div>` : `<div class="text-[10px] text-emerald-300 mt-0.5">🔍 Hover to compare with your current ${item.slot}</div>`}
           </div>
           <div class="flex flex-col gap-1.5 shrink-0">
-            <button type="button" data-buy-exclusive-gold="${item.id}" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs">🪙 ${item.priceGold}</button>
+            ${goldBtn}
             <button type="button" data-buy-exclusive-cp="${item.id}" class="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold text-xs">🎓 ${item.priceCP} CP</button>
           </div>
         </div>
-      `).join("");
+      `;
+      }).join("");
 
       const isArtisanClass = stu.classRank === 11;
       document.getElementById("artisanDiscountBadge").textContent =
@@ -7244,13 +7305,23 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       const eqRows = GEAR_SLOTS.map(slot => {
         const g = stu.equipped[slot];
         if (!g) return "";
+        if (g.broken || g.durability <= 0) {
+          return `
+          <div class="bg-slate-950/90 border border-rose-800/60 rounded-xl p-2.5 flex items-center justify-between gap-2">
+            <div>
+              <div class="text-xs font-bold text-white">${g.icon} ${g.name} <span class="text-rose-300">[Broken]</span></div>
+              <div class="text-[11px] text-rose-400">${slot} • Permanently shattered — cannot repair</div>
+            </div>
+            <button type="button" disabled class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-500 font-bold text-xs">Unrepairable</button>
+          </div>`;
+        }
         const missing = 100 - g.durability;
         const cost = computeGearRepairCost(g, stu);
         totalRepairCost += cost;
         return `
           <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between gap-2">
             <div>
-              <div class="text-xs font-bold text-white">${g.icon} ${g.name} <span class="text-amber-300">[${g.rarity}]</span></div>
+              <div class="text-xs font-bold text-white">${g.icon} ${g.name} <span class="text-amber-300">[${rarityDisplayName(g.rarity)}]</span></div>
               <div class="text-[11px] ${g.durability < 50 ? 'text-rose-400' : 'text-emerald-400'}">${slot} • Durability: ${g.durability} / 100</div>
             </div>
             <button type="button" data-repair-slot="${slot}" ${missing === 0 ? 'disabled' : ''} class="px-2.5 py-1 rounded-lg ${missing === 0 ? 'bg-slate-800 text-slate-500' : 'bg-amber-500 hover:bg-amber-400 text-slate-950'} font-bold text-xs">
@@ -7677,7 +7748,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         });
       })();
 
-      appendLog("👑 Welcome to Chronicles of the LS Land! All 5 Dungeons are unlocked. Check your Loadout or enter the Forgotten Armory!", "amber");
+      appendLog("👑 Welcome to Chronicles of the LS Land v1.1! Open dungeons await — conquer them, then face the elite Guild Sanctum (Class Rank 13+). Check your Loadout or enter the Forgotten Armory!", "amber");
       renderAll();
       updateCloudStatusUI();
       if (cloudConfig.enabled && cloudConfig.endpoint) {
@@ -7913,14 +7984,16 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         const stu = requireLoggedInStudent();
         if (!stu) return;
         let totalCost = 0;
+        let repairable = 0;
         for (const slot of GEAR_SLOTS) {
           const g = stu.equipped[slot];
-          if (g && g.durability < 100) {
+          if (g && !g.broken && g.durability > 0 && g.durability < 100) {
             totalCost += computeGearRepairCost(g, stu);
+            repairable++;
           }
         }
-        if (totalCost === 0) {
-          showToast("All equipped gear is already at 100% durability!", "emerald");
+        if (repairable === 0) {
+          showToast("No repairable equipped gear (broken pieces cannot be repaired)!", "amber");
           return;
         }
         if (stu.gold < totalCost) {
@@ -7929,13 +8002,14 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         }
         stu.gold -= totalCost;
         for (const slot of GEAR_SLOTS) {
-          if (stu.equipped[slot]) stu.equipped[slot].durability = 100;
+          const g = stu.equipped[slot];
+          if (g && !g.broken && g.durability > 0) g.durability = 100;
         }
         stu.repairCount = (stu.repairCount || 0) + 1;
         playSfx("fanfare");
         saveDatabase();
         renderAll();
-        showToast(`🔧 Master Grom repaired all equipped gear to 100% (-${totalCost} Gold)!`, "emerald");
+        showToast(`🔧 Master Grom repaired ${repairable} piece(s) to 100% (-${totalCost} Gold)!`, "emerald");
       };
 
       document.getElementById("btnRepairAllQuick").addEventListener("click", repairAllEquipped);
@@ -8497,14 +8571,20 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           const stu = getActiveStudent();
           const idx = stu.inventory.findIndex(i => i.uid === uid);
           if (idx !== -1) {
-            const newItem = stu.inventory.splice(idx, 1)[0];
+            const newItem = stu.inventory[idx];
+            if (newItem.broken || newItem.durability <= 0) {
+              newItem.broken = true;
+              showToast("💔 Broken gear cannot be equipped!", "rose");
+              return;
+            }
+            stu.inventory.splice(idx, 1);
             const prevEquipped = stu.equipped[newItem.slot];
             if (prevEquipped) stu.inventory.unshift(prevEquipped);
             stu.equipped[newItem.slot] = newItem;
             playSfx("click");
             saveDatabase();
             renderAll();
-            showToast(`🛡️ Equipped [${newItem.rarity}] ${newItem.name}!`, "amber");
+            showToast(`🛡️ Equipped [${rarityDisplayName(newItem.rarity)}] ${newItem.name}!`, "amber");
           }
           return;
         }
@@ -8517,12 +8597,13 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           const idx = stu.inventory.findIndex(i => i.uid === uid);
           if (idx !== -1) {
             const item = stu.inventory.splice(idx, 1)[0];
-            const val = item.sellValue || 20;
+            const isBroken = !!(item.broken || item.durability <= 0);
+            const val = isBroken ? getBrokenScrapSellValue(item) : (item.sellValue || 20);
             stu.gold += val;
             playSfx("click");
             saveDatabase();
             renderAll();
-            showToast(`🪙 Sold ${item.name} for +${val} Gold!`, "amber");
+            showToast(isBroken ? `🪙 Scrapped broken ${item.name} for +${val} Gold (5%)!` : `🪙 Sold ${item.name} for +${val} Gold!`, "amber");
           }
           return;
         }
@@ -8534,6 +8615,10 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           if (!stu) return;
           const g = stu.equipped[slot];
           if (!g || g.durability >= 100) return;
+          if (g.broken || g.durability <= 0) {
+            showToast("💔 Broken gear cannot be repaired — scrap it from your backpack.", "rose");
+            return;
+          }
           const cost = computeGearRepairCost(g, stu);
           if (stu.gold < cost) return showToast(`Need ${cost} Gold to repair!`, "rose");
           stu.gold -= cost;
@@ -8587,13 +8672,20 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           const tpl = SHOP_EXCLUSIVE_ITEMS.find(x => x.id === itemId);
           if (!tpl) return;
           const stu = getActiveStudent();
+          if (tpl.requireClassRank && (stu.classRank || 1) < tpl.requireClassRank) {
+            return showToast(`🔒 Requires Social Class Rank ${tpl.requireClassRank}+ to purchase!`, "rose");
+          }
           if (exGoldBtn) {
+            if (tpl.cpOnly || !tpl.priceGold) return showToast("This item is CP-only — gold cannot buy it.", "rose");
             if (stu.gold < tpl.priceGold) return showToast(`Need ${tpl.priceGold} Gold!`, "rose");
             stu.gold -= tpl.priceGold;
           } else {
             if (stu.cp < tpl.priceCP) return showToast(`Need ${tpl.priceCP} CP!`, "rose");
             stu.cp -= tpl.priceCP;
           }
+          const sellBase = tpl.priceGold
+            ? Math.max(15, Math.round(tpl.priceGold * 0.05 / (RARITY_SELL_MULT[tpl.rarity] || 1)))
+            : Math.max(15, Math.round((tpl.priceCP || 2000) * 2));
           const bought = {
             uid: "gear_shop_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6),
             name: tpl.name,
@@ -8608,13 +8700,14 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
             durability: 100,
             maxDurability: 100,
             isCosmetic: false,
-            sellValue: getSellValueForRarity(Math.max(15, Math.round(tpl.priceGold * 0.05 / (RARITY_SELL_MULT[tpl.rarity] || 1))), tpl.rarity, 1)
+            broken: false,
+            sellValue: getSellValueForRarity(sellBase, tpl.rarity, 1)
           };
           stu.inventory.unshift(bought);
-          playSfx("fanfare");
+          playSfx(tpl.rarity === "LauSir" || tpl.rarity === "Legendary" ? "legendary" : "fanfare");
           saveDatabase();
           renderAll();
-          showToast(`⚔️ Purchased [${bought.rarity}] ${bought.name}! Check your Backpack.`, "amber");
+          showToast(`⚔️ Purchased [${rarityDisplayName(bought.rarity)}] ${bought.name}! Check your Backpack.`, "amber");
           return;
         }
 
