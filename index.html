@@ -597,7 +597,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Chronicles of the LS Land v1.1 — Classroom RPG</title>
-  <!-- Chronicles of LS Land v1.1: auto-return + diminishing dungeon rewards, endgame dungeons (tempest/voidcathedral/titanforge + guildsanctum Class 13 Rare+), Lau Sir Certified CP shop set (Class 16+), permanent gear break at 0% durability -->
+  <!-- Chronicles of LS Land v1.1: auto-return + diminishing dungeon rewards, endgame dungeons (tempest/voidcathedral/titanforge + guildsanctum Class 13 Rare+), originals retuned (~10k–100k recPower), Lau Sir Certified CP shop set (Class 16+), permanent gear break at 0% durability -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&amp;family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
   <style>
@@ -4524,72 +4524,72 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       { id: "elder_dragon", name: "Elder Crimson Dragon", category: "Dragons", color: "#fbbf24", baseHp: 910, baseAtk: 182, baseDef: 82 }
     ];
 
-    // v1.1 — endgame dungeons scaled for ~70k+ gearPower players (citadel recPower 3900 is mid-game now)
+    // v1.1 — originals retuned for ~70k gearPower ladder; citadel ~100k sits just under tempest 120k
     const DUNGEONS = [
       {
         id: "armory",
         name: "1. Forgotten Armory",
         icon: "⚔️",
-        recPower: 220,
-        tierMult: 1.12,
+        recPower: 10000,
+        tierMult: 3.5,
         roomsCount: 18,
         biasSlots: ["Weapon"],
         biasDesc: "60% Drop Bias: Weapons",
         monsterPool: ["dire_wolf", "goblin_marauder", "dark_bandit", "giant_spider"],
-        boss: { name: "Grimjaw the Iron Cleaver", category: "Humanoid", color: "#f59e0b", hp: 580, atk: 62, def: 28 },
-        lore: "An overgrown royal smithy seized by ruthless marauders and wild beasts. Challenging yet rewarding!"
+        boss: { name: "Grimjaw the Iron Cleaver", category: "Humanoid", color: "#f59e0b", hp: 40000, atk: 2500, def: 1150 },
+        lore: "An overgrown royal smithy seized by ruthless marauders and wild beasts. Still the starter maze — but geared heroes won't sleepwalk it."
       },
       {
         id: "catacombs",
         name: "2. Cursed Catacombs",
         icon: "💀",
-        recPower: 580,
-        tierMult: 2.45,
+        recPower: 30000,
+        tierMult: 8,
         roomsCount: 18,
         biasSlots: ["Helmet", "Chestplate"],
         biasDesc: "60% Drop Bias: Helmets & Chestplates",
         monsterPool: ["skeleton_warrior", "cursed_wraith", "plague_zombie", "giant_spider", "rabid_bear"],
-        boss: { name: "Arch-Lich Malakor", category: "Undead", color: "#38bdf8", hp: 1680, atk: 142, def: 65 },
+        boss: { name: "Arch-Lich Malakor", category: "Undead", color: "#38bdf8", hp: 120000, atk: 7500, def: 3450 },
         lore: "Eerie emerald-lit burial vaults beneath the old abbey where lethal undead guard the Second Shard."
       },
       {
         id: "ironclad",
         name: "3. Ironclad Keep",
         icon: "🏰",
-        recPower: 1250,
-        tierMult: 4.8,
+        recPower: 55000,
+        tierMult: 15,
         roomsCount: 20,
         biasSlots: ["Shield", "Gauntlets/Boots"],
         biasDesc: "60% Drop Bias: Shields & Boots",
         monsterPool: ["stone_golem", "animated_armour", "orc_berserker", "dark_bandit"],
-        boss: { name: "Colossus Vanguard MK-IV", category: "Constructs", color: "#60a5fa", hp: 3950, atk: 295, def: 145 },
+        boss: { name: "Colossus Vanguard MK-IV", category: "Constructs", color: "#60a5fa", hp: 225000, atk: 14000, def: 6300 },
         lore: "A chained fortress of relentless clockwork golems and animated plate armor protecting the Third Shard."
       },
       {
         id: "abyssal",
         name: "4. Abyssal Cavern",
         icon: "🔮",
-        recPower: 2250,
-        tierMult: 8.5,
+        recPower: 80000,
+        tierMult: 27,
         roomsCount: 22,
         biasSlots: ["Accessory", "Weapon"],
         biasDesc: "60% Drop Bias: Accessories & Weapons",
         monsterPool: ["hellhound", "imp_warlock", "stone_golem", "cursed_wraith"],
-        boss: { name: "Azazel the Abyssal Fiend", category: "Demons", color: "#ec4899", hp: 7900, atk: 535, def: 245 },
+        boss: { name: "Azazel the Abyssal Fiend", category: "Demons", color: "#ec4899", hp: 325000, atk: 20000, def: 9200 },
         lore: "Deep luminescent crystal caverns where demonic warlocks siphon mana from the Fourth Shard."
       },
       {
         id: "citadel",
         name: "5. Dragon's Citadel",
         icon: "🐉",
-        recPower: 3900,
-        tierMult: 14.5,
+        recPower: 100000,
+        tierMult: 46,
         roomsCount: 24,
         biasSlots: ["Weapon", "Chestplate", "Accessory"],
         biasDesc: "60% Drop Bias: Sovereign Relics",
         monsterPool: ["wyvern", "elder_dragon", "hellhound", "imp_warlock", "animated_armour"],
-        boss: { name: "Ignisaur the Elder Sovereign", category: "Dragons", color: "#fbbf24", hp: 15800, atk: 980, def: 450 },
-        lore: "The volcanic throne peak of LS Land! Walk in unprepared at Level 1 and Ignisaur will incinerate you instantly."
+        boss: { name: "Ignisaur the Elder Sovereign", category: "Dragons", color: "#fbbf24", hp: 405000, atk: 25000, def: 11500 },
+        lore: "The volcanic throne peak of LS Land! ~100k Gear Power recommended — the gateway before Tempest Bastion."
       },
       {
         id: "tempest",
@@ -4648,11 +4648,11 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
     ];
 
     const MAIN_QUESTS = [
-      { id: "mq_1", title: "Ch. 1: Reclaim the Forgotten Armory", desc: "Explore the Forgotten Armory maze and defeat Grimjaw the Iron Cleaver to recover the 1st Shard of Wisdom.", targetDungeon: "armory", rewardGold: 250, rewardExp: 120, rewardCP: 10 },
-      { id: "mq_2", title: "Ch. 2: Purge the Cursed Catacombs", desc: "Navigate the undead crypts and vanquish Arch-Lich Malakor for the 2nd Shard.", targetDungeon: "catacombs", rewardGold: 600, rewardExp: 300, rewardCP: 15 },
-      { id: "mq_3", title: "Ch. 3: Breach the Ironclad Keep", desc: "Shatter the Colossus Vanguard MK-IV inside Ironclad Keep to claim the 3rd Shard.", targetDungeon: "ironclad", rewardGold: 1400, rewardExp: 700, rewardCP: 25 },
-      { id: "mq_4", title: "Ch. 4: Light of the Abyssal Cavern", desc: "Banish Azazel the Abyssal Fiend in the crystal depths to secure the 4th Shard.", targetDungeon: "abyssal", rewardGold: 2800, rewardExp: 1500, rewardCP: 40 },
-      { id: "mq_5", title: "Ch. 5: Crown of the LS Sovereign", desc: "Ascend the volcanic Dragon's Citadel and defeat Ignisaur the Elder Sovereign Dragon!", targetDungeon: "citadel", rewardGold: 6000, rewardExp: 3500, rewardCP: 100 },
+      { id: "mq_1", title: "Ch. 1: Reclaim the Forgotten Armory", desc: "Explore the Forgotten Armory maze and defeat Grimjaw the Iron Cleaver to recover the 1st Shard of Wisdom.", targetDungeon: "armory", rewardGold: 1200, rewardExp: 600, rewardCP: 20 },
+      { id: "mq_2", title: "Ch. 2: Purge the Cursed Catacombs", desc: "Navigate the undead crypts and vanquish Arch-Lich Malakor for the 2nd Shard.", targetDungeon: "catacombs", rewardGold: 2500, rewardExp: 1200, rewardCP: 30 },
+      { id: "mq_3", title: "Ch. 3: Breach the Ironclad Keep", desc: "Shatter the Colossus Vanguard MK-IV inside Ironclad Keep to claim the 3rd Shard.", targetDungeon: "ironclad", rewardGold: 5000, rewardExp: 2500, rewardCP: 45 },
+      { id: "mq_4", title: "Ch. 4: Light of the Abyssal Cavern", desc: "Banish Azazel the Abyssal Fiend in the crystal depths to secure the 4th Shard.", targetDungeon: "abyssal", rewardGold: 9000, rewardExp: 5000, rewardCP: 70 },
+      { id: "mq_5", title: "Ch. 5: Crown of the LS Sovereign", desc: "Ascend the volcanic Dragon's Citadel and defeat Ignisaur the Elder Sovereign Dragon!", targetDungeon: "citadel", rewardGold: 14000, rewardExp: 9000, rewardCP: 120 },
       { id: "mq_6", title: "Ch. 6: Tempest Bastion Rising", desc: "Storm the lightning-wreathed Tempest Bastion and defeat Thundrak the Storm Tyrant!", targetDungeon: "tempest", rewardGold: 18000, rewardExp: 12000, rewardCP: 150 },
       { id: "mq_7", title: "Ch. 7: Hymn of the Void Cathedral", desc: "Descend into the Void Cathedral and silence Nullarch Vesperyx before the void consumes LS Land.", targetDungeon: "voidcathedral", rewardGold: 45000, rewardExp: 30000, rewardCP: 220 },
       { id: "mq_8", title: "Ch. 8: Hammer of the Titan's Forge", desc: "Endure the World-Anvil and defeat Kharoth in the Titan's Forge!", targetDungeon: "titanforge", rewardGold: 100000, rewardExp: 70000, rewardCP: 350 },
