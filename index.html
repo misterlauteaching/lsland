@@ -4271,6 +4271,14 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
     function getBrokenScrapSellValue(item) {
       return Math.max(1, Math.floor((item && item.sellValue != null ? item.sellValue : 15) * 0.05));
     }
+    function isGearUnbreakable(item) {
+      if (!item) return false;
+      if (item.unbreakable === true) return true;
+      if (item.rarity === "LauSir") return true;
+      if (typeof item.id === "string" && item.id.startsWith("lausir_")) return true;
+      if (typeof item.shopId === "string" && item.shopId.startsWith("lausir_")) return true;
+      return false;
+    }
     function getDungeonRewardEfficiency(stu, dungeonId) {
       const clearCount = (stu && stu.ClearedDungeons && stu.ClearedDungeons[dungeonId]) || 0;
       return Math.max(0.01, +(1.0 - clearCount * 0.10).toFixed(2));
@@ -4693,12 +4701,12 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       { id: "shop_w2", name: "Legendary Greatsword", slot: "Weapon", icon: "🗡️", rarity: "Legendary", atk: 185, def: 65, hp: 420, mp: 95, traits: ["Dragon Slayer", "Vampiric", "Devastation"], priceGold: 28000, priceCP: 1273 },
       { id: "shop_a1", name: "Legendary Amulet", slot: "Accessory", icon: "💎", rarity: "Legendary", atk: 125, def: 110, hp: 560, mp: 180, traits: ["Fortune's Favor", "Holy Ward", "Executioner"], priceGold: 36000, priceCP: 1636 },
       // v1.1 Easter egg — Lau Sir Certified set (5× best shop piece per slot). CP-only. Visible at classRank >= 16.
-      { id: "lausir_w", name: "Lau Sir Certified Greatsword", slot: "Weapon", icon: "🗡️", rarity: "LauSir", atk: 925, def: 325, hp: 2100, mp: 475, traits: ["Dragon Slayer", "Vampiric", "Devastation"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16 },
-      { id: "lausir_h", name: "Lau Sir Certified Crown", slot: "Helmet", icon: "👑", rarity: "LauSir", atk: 220, def: 290, hp: 975, mp: 425, traits: ["Arcane Surge", "Mana Siphon", "Critical Eye"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16 },
-      { id: "lausir_c", name: "Lau Sir Certified Plate", slot: "Chestplate", icon: "🥋", rarity: "LauSir", atk: 175, def: 440, hp: 1550, mp: 210, traits: ["Fortified", "Vitality", "Scale Shielding"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16 },
-      { id: "lausir_b", name: "Lau Sir Certified Greaves", slot: "Gauntlets/Boots", icon: "🥾", rarity: "LauSir", atk: 150, def: 210, hp: 650, mp: 110, traits: ["Swiftness", "Berserker", "Critical Eye"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16 },
-      { id: "lausir_s", name: "Lau Sir Certified Bulwark", slot: "Shield", icon: "🛡️", rarity: "LauSir", atk: 140, def: 525, hp: 1750, mp: 175, traits: ["Scale Shielding", "Thorns", "Fortified"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16 },
-      { id: "lausir_a", name: "Lau Sir Certified Amulet", slot: "Accessory", icon: "💎", rarity: "LauSir", atk: 625, def: 550, hp: 2800, mp: 900, traits: ["Fortune's Favor", "Holy Ward", "Executioner"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16 }
+      { id: "lausir_w", name: "Lau Sir Certified Greatsword", slot: "Weapon", icon: "🗡️", rarity: "LauSir", atk: 925, def: 325, hp: 2100, mp: 475, traits: ["Dragon Slayer", "Vampiric", "Devastation"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16, unbreakable: true },
+      { id: "lausir_h", name: "Lau Sir Certified Crown", slot: "Helmet", icon: "👑", rarity: "LauSir", atk: 220, def: 290, hp: 975, mp: 425, traits: ["Arcane Surge", "Mana Siphon", "Critical Eye"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16, unbreakable: true },
+      { id: "lausir_c", name: "Lau Sir Certified Plate", slot: "Chestplate", icon: "🥋", rarity: "LauSir", atk: 175, def: 440, hp: 1550, mp: 210, traits: ["Fortified", "Vitality", "Scale Shielding"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16, unbreakable: true },
+      { id: "lausir_b", name: "Lau Sir Certified Greaves", slot: "Gauntlets/Boots", icon: "🥾", rarity: "LauSir", atk: 150, def: 210, hp: 650, mp: 110, traits: ["Swiftness", "Berserker", "Critical Eye"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16, unbreakable: true },
+      { id: "lausir_s", name: "Lau Sir Certified Bulwark", slot: "Shield", icon: "🛡️", rarity: "LauSir", atk: 140, def: 525, hp: 1750, mp: 175, traits: ["Scale Shielding", "Thorns", "Fortified"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16, unbreakable: true },
+      { id: "lausir_a", name: "Lau Sir Certified Amulet", slot: "Accessory", icon: "💎", rarity: "LauSir", atk: 625, def: 550, hp: 2800, mp: 900, traits: ["Fortune's Favor", "Holy Ward", "Executioner"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16, unbreakable: true }
     ];
 
     const COSMETIC_BOXES = [
@@ -5752,7 +5760,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
     }
 
     function computeGearRepairCost(gear, stu = getActiveStudent()) {
-      if (!gear || gear.broken || gear.durability <= 0 || gear.durability >= 100) return 0;
+      if (!gear || isGearUnbreakable(gear) || gear.broken || gear.durability <= 0 || gear.durability >= 100) return 0;
       const missing = 100 - gear.durability;
       const isArtisanClass = stu && stu.classRank === 11;
       const discountMult = isArtisanClass ? 0.75 : 1.0;
@@ -5786,10 +5794,16 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       for (const slot of GEAR_SLOTS) {
         const item = stu.equipped[slot];
         if (!item) continue;
-        // v1.1: broken / 0% durability contributes nothing
-        if (item.broken || (item.durability != null && item.durability <= 0)) continue;
+        // v1.1: broken / 0% durability contributes nothing (unbreakable never breaks)
+        if (isGearUnbreakable(item)) {
+          // force healthy state
+          item.unbreakable = true;
+          item.broken = false;
+        } else if (item.broken || (item.durability != null && item.durability <= 0)) {
+          continue;
+        }
         if (item.rarity === "Legendary" || item.rarity === "LauSir") hasLegendary = true;
-        const durMult = item.durability < 50 ? 0.65 : 1.0;
+        const durMult = isGearUnbreakable(item) ? 1.0 : (item.durability < 50 ? 0.65 : 1.0);
         gearHp  += Math.round((item.hp || 0) * durMult);
         gearAtk += Math.round((item.atk || 0) * durMult);
         gearDef += Math.round((item.def || 0) * durMult);
@@ -6157,7 +6171,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       // Soft warn once if any equipped piece is nearly broken
       const lowDur = GEAR_SLOTS.some(slot => {
         const g = stuGate.equipped[slot];
-        return g && !g.broken && g.durability < 15;
+        return g && !isGearUnbreakable(g) && !g.broken && g.durability < 15;
       });
       if (lowDur) {
         showToast("⚠️ Some equipped gear is below 15% durability — it will shatter permanently at 0%!", "amber");
@@ -6375,9 +6389,15 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       const stu = getActiveStudent();
       for (const slot of GEAR_SLOTS) {
         const g = stu.equipped[slot];
-        if (g && !g.broken && g.durability > 0) {
+        if (!g || g.broken || isGearUnbreakable(g)) continue;
+        if (g.durability > 0) {
           g.durability = Math.max(0, g.durability - amount);
           if (g.durability <= 0) {
+            // Never break Lau Sir / unbreakable pieces (belt-and-suspenders)
+            if (isGearUnbreakable(g)) {
+              g.durability = 100;
+              continue;
+            }
             g.durability = 0;
             g.broken = true;
             stu.equipped[slot] = null;
@@ -7140,7 +7160,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           <div class="p-2.5 rounded-xl border-2 rarity-${item.rarity} transition relative">
             <div class="flex items-center justify-between text-[10px] font-bold">
               <span class="text-slate-300 uppercase">${slot}</span>
-              <span class="${item.broken || item.durability <= 0 ? 'text-rose-500' : (item.durability < 50 ? 'text-rose-400' : 'text-emerald-400')}">${item.broken || item.durability <= 0 ? '💔 Broken' : '🔧 ' + item.durability + '%'}</span>
+              <span class="${isGearUnbreakable(item) ? 'text-amber-300' : (item.broken || item.durability <= 0 ? 'text-rose-500' : (item.durability < 50 ? 'text-rose-400' : 'text-emerald-400'))}">${isGearUnbreakable(item) ? '♾️ Unbreakable' : (item.broken || item.durability <= 0 ? '💔 Broken' : '🔧 ' + item.durability + '%')}</span>
             </div>
             <div class="flex items-center gap-1.5 mt-1">
               <span class="text-lg">${item.icon}</span>
@@ -7203,7 +7223,9 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
             return `<span class="${cls}">${icon}${val}${dStr ? ' ' + dStr : ''}</span>`;
           };
 
-          const isBroken = !!(item.broken || (item.durability != null && item.durability <= 0));
+          const unbreakable = isGearUnbreakable(item);
+          if (unbreakable) { item.unbreakable = true; item.broken = false; if (item.durability != null && item.durability < 100) item.durability = 100; }
+          const isBroken = !unbreakable && !!(item.broken || (item.durability != null && item.durability <= 0));
           if (isBroken) item.broken = true;
           const sellAmt = isBroken ? getBrokenScrapSellValue(item) : (item.sellValue || 20);
           return `
@@ -7212,8 +7234,8 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
               <div class="flex items-center justify-between text-[10px] font-bold uppercase gap-1">
                 <span class="px-2 py-0.5 rounded bg-slate-950/80 text-amber-300">${rarityDisplayName(item.rarity)} • ${item.slot}</span>
                 <div class="flex items-center gap-1.5">
-                  ${isBroken ? '<span class="px-1.5 py-0.5 rounded bg-rose-900/80 border border-rose-500/50 text-rose-200 font-extrabold">💔 Broken</span>' : pwrBadge}
-                  <span class="${isBroken ? 'text-rose-400' : 'text-emerald-400'}">${isBroken ? '0%' : '🔧 ' + item.durability + '%'}</span>
+                  ${isBroken ? '<span class="px-1.5 py-0.5 rounded bg-rose-900/80 border border-rose-500/50 text-rose-200 font-extrabold">💔 Broken</span>' : (unbreakable ? '<span class="px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-400/50 text-amber-200 font-extrabold">♾️ Unbreakable</span>' : pwrBadge)}
+                  <span class="${isBroken ? 'text-rose-400' : (unbreakable ? 'text-amber-300' : 'text-emerald-400')}">${isBroken ? '0%' : (unbreakable ? '∞' : '🔧 ' + item.durability + '%')}</span>
                 </div>
               </div>
               <div class="flex items-center gap-2 mt-1.5">
@@ -7305,6 +7327,16 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       const eqRows = GEAR_SLOTS.map(slot => {
         const g = stu.equipped[slot];
         if (!g) return "";
+        if (isGearUnbreakable(g)) {
+          return `
+          <div class="bg-slate-950/90 border border-amber-500/40 rounded-xl p-2.5 flex items-center justify-between gap-2">
+            <div>
+              <div class="text-xs font-bold text-white">${g.icon} ${g.name} <span class="text-amber-300">[${rarityDisplayName(g.rarity)}]</span></div>
+              <div class="text-[11px] text-amber-300">${slot} • ♾️ Unbreakable — never loses durability</div>
+            </div>
+            <button type="button" disabled class="px-2.5 py-1 rounded-lg bg-slate-800 text-amber-400/80 font-bold text-xs">Unbreakable</button>
+          </div>`;
+        }
         if (g.broken || g.durability <= 0) {
           return `
           <div class="bg-slate-950/90 border border-rose-800/60 rounded-xl p-2.5 flex items-center justify-between gap-2">
@@ -7987,7 +8019,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         let repairable = 0;
         for (const slot of GEAR_SLOTS) {
           const g = stu.equipped[slot];
-          if (g && !g.broken && g.durability > 0 && g.durability < 100) {
+          if (g && !isGearUnbreakable(g) && !g.broken && g.durability > 0 && g.durability < 100) {
             totalCost += computeGearRepairCost(g, stu);
             repairable++;
           }
@@ -8003,7 +8035,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         stu.gold -= totalCost;
         for (const slot of GEAR_SLOTS) {
           const g = stu.equipped[slot];
-          if (g && !g.broken && g.durability > 0) g.durability = 100;
+          if (g && !isGearUnbreakable(g) && !g.broken && g.durability > 0) g.durability = 100;
         }
         stu.repairCount = (stu.repairCount || 0) + 1;
         playSfx("fanfare");
@@ -8615,6 +8647,10 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           if (!stu) return;
           const g = stu.equipped[slot];
           if (!g || g.durability >= 100) return;
+          if (isGearUnbreakable(g)) {
+            showToast("♾️ Lau Sir Certified gear is unbreakable — no repair needed!", "amber");
+            return;
+          }
           if (g.broken || g.durability <= 0) {
             showToast("💔 Broken gear cannot be repaired — scrap it from your backpack.", "rose");
             return;
@@ -8688,6 +8724,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
             : Math.max(15, Math.round((tpl.priceCP || 2000) * 2));
           const bought = {
             uid: "gear_shop_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6),
+            shopId: tpl.id,
             name: tpl.name,
             slot: tpl.slot,
             icon: tpl.icon,
@@ -8701,6 +8738,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
             maxDurability: 100,
             isCosmetic: false,
             broken: false,
+            unbreakable: !!(tpl.unbreakable || tpl.rarity === "LauSir"),
             sellValue: getSellValueForRarity(sellBase, tpl.rarity, 1)
           };
           stu.inventory.unshift(bought);
