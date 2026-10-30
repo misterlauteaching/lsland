@@ -1729,7 +1729,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
         <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-xl">
           <div>
             <h2 class="font-medieval text-lg font-bold text-white">⚔️ Royal Armory (Shop-Exclusive Gear)</h2>
-            <p class="text-xs text-slate-400">Gold armory <strong class="text-amber-300">scales with your cleared dungeons</strong> (and level) — slightly better (~1.15×) than drops at your progress tier, for a higher gold price. Lau Sir Certified stays CP-only.</p>
+            <p class="text-xs text-slate-400">Gold armory <strong class="text-amber-300">scales with your level</strong> — slightly better (~1.15×) than dungeon drops at your level, for a higher gold price. Lau Sir Certified stays CP-only.</p>
           </div>
           <div id="shopExclusiveList" class="space-y-2.5 max-h-none sm:max-h-[520px] overflow-y-visible sm:overflow-y-auto pr-1">
         <div data-hover-shop-id="shop_c_w1" class="p-3 rounded-xl border-2 rarity-Common flex items-center justify-between gap-2 cursor-pointer hover:ring-2 hover:ring-amber-400/60 transition">
@@ -6313,21 +6313,12 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
     }
 
     /** Progress loot tier: max(highest cleared dungeon lootTier, level*0.22). No clears → Novice baseline. */
+    function getPlayerLevelLootTier(stu) {
+      return Math.max(1, ((stu && stu.level) ? stu.level : 1) * 0.22);
+    }
+
     function getStudentProgressLootTier(stu) {
-      const levelScale = Math.max(1, (stu && stu.level ? stu.level : 1) * 0.22);
-      let bestCleared = null;
-      const clears = (stu && stu.ClearedDungeons) || {};
-      for (const d of DUNGEONS) {
-        if ((clears[d.id] || 0) > 0) {
-          const lt = getDungeonLootTier(d);
-          if (bestCleared == null || lt > bestCleared) bestCleared = lt;
-        }
-      }
-      if (bestCleared == null) {
-        const novice = DUNGEONS.find(d => d.id === "noviceland");
-        bestCleared = novice ? getDungeonLootTier(novice) : 0.75;
-      }
-      return Math.max(bestCleared, levelScale);
+      return getPlayerLevelLootTier(stu);
     }
 
     const SHOP_RARITY_GOLD_MULT = { Common: 1.6, Rare: 4.2, Exotic: 12, Legendary: 36, LauSir: 1 };
@@ -6346,7 +6337,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       return pool[0];
     }
 
-    /** Live-scaled Royal Armory offer (Lau Sir unchanged). Stats ≈ 1.15× dungeon drop at progress tier. */
+    /** Live-scaled Royal Armory offer (Lau Sir unchanged). Stats ≈ 1.15× level-scaled drop. */
     function getScaledShopOffer(tpl, stu) {
       if (!tpl) return null;
       if (isLauSirShopItem(tpl)) {
@@ -6359,7 +6350,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           shopScaled: false
         };
       }
-      const tier = getStudentProgressLootTier(stu);
+      const tier = getPlayerLevelLootTier(stu);
       const baseSub = pickShopSubtype(tpl);
       const drop = scaleStatsByRarity(tpl.slot, baseSub, tpl.rarity, tier);
       const atk = Math.max(1, Math.round(drop.atk * 1.15));
@@ -6404,6 +6395,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
 
     function createStarStudentPendant(stu) {
       const stats = computeStarStudentPendantStats(stu);
+      const lockedClassRank = stu.classRank || 1;
       return {
         uid: "gift_pendant_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6),
         giftId: "gift_lausir_star_pendant",
@@ -6422,25 +6414,37 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         broken: false,
         unbreakable: false,
         scalesWithLevel: true,
+        lockedClassRank: lockedClassRank,
         lootTier: stats.lootTier,
         sourceDungeonId: null,
-        sellValue: getSellValueForRarity(40, "Exotic", stats.lootTier)
+        sellForCP: 100,
+        sellValue: 0
       };
     }
 
     function refreshStarStudentPendantOnStudent(stu) {
       if (!stu) return false;
+      const rank = stu.classRank || 1;
       let changed = false;
       const apply = (gear) => {
         if (!isStarStudentPendant(gear)) return;
+        // Legacy gifts without lock: stamp current class so they keep scaling until promoted
+        if (gear.lockedClassRank == null || !Number.isFinite(Number(gear.lockedClassRank))) {
+          gear.lockedClassRank = rank;
+          changed = true;
+        }
+        gear.giftId = "gift_lausir_star_pendant";
+        gear.name = "Lau Sir's star student pendant";
+        gear.scalesWithLevel = true;
+        gear.sellForCP = 100;
+        gear.sellValue = 0;
+        // Only scale while student remains at the locked social class
+        if (Number(gear.lockedClassRank) !== Number(rank)) return;
         const stats = computeStarStudentPendantStats(stu);
         if (gear.atk !== stats.atk || gear.def !== stats.def || gear.hp !== stats.hp || gear.mp !== stats.mp) {
           gear.atk = stats.atk; gear.def = stats.def; gear.hp = stats.hp; gear.mp = stats.mp;
           changed = true;
         }
-        gear.scalesWithLevel = true;
-        gear.giftId = "gift_lausir_star_pendant";
-        gear.name = "Lau Sir's star student pendant";
         gear.lootTier = stats.lootTier;
       };
       if (stu.equipped && typeof stu.equipped === "object") {
@@ -6452,31 +6456,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
 
     function giftStarStudentPendantToStudent(stu) {
       if (!stu) return null;
-      // Replace/refresh existing
-      let existing = null;
-      if (stu.equipped && stu.equipped["Accessory"] && isStarStudentPendant(stu.equipped["Accessory"])) {
-        existing = stu.equipped["Accessory"];
-      }
-      if (!existing && Array.isArray(stu.inventory)) {
-        existing = stu.inventory.find(isStarStudentPendant) || null;
-      }
-      if (existing) {
-        const stats = computeStarStudentPendantStats(stu);
-        existing.atk = stats.atk; existing.def = stats.def; existing.hp = stats.hp; existing.mp = stats.mp;
-        existing.scalesWithLevel = true;
-        existing.giftId = "gift_lausir_star_pendant";
-        existing.name = "Lau Sir's star student pendant";
-        existing.rarity = "Exotic";
-        existing.slot = "Accessory";
-        existing.icon = "⭐";
-        existing.lootTier = stats.lootTier;
-        existing.broken = false;
-        existing.durability = existing.maxDurability || 100;
-        if (!Array.isArray(existing.traits) || !existing.traits.length) {
-          existing.traits = ["Fortune's Favor", "Critical Eye"];
-        }
-        return existing;
-      }
+      // Always create a NEW pendant locked to the student's current social class
       const item = createStarStudentPendant(stu);
       if (!Array.isArray(stu.inventory)) stu.inventory = [];
       stu.inventory.unshift(item);
@@ -6495,7 +6475,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       const minRarity = forceMinRarity || (dungeon && dungeon.minDropRarity) || null;
       const rarity = rollRarity(minRarity);
 
-      const tierScale = dungeon ? getDungeonLootTier(dungeon) : Math.max(1, stu.level * 0.22);
+      const tierScale = Math.max(1, (stu.level || 1) * 0.22); // primary: player level (not dungeon lootTier)
       const subPool = GEAR_SUBTYPES[slot];
       const baseSub = subPool[Math.floor(Math.random() * subPool.length)];
 
@@ -7857,7 +7837,9 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           if (unbreakable) { item.unbreakable = true; item.broken = false; if (item.durability != null && item.durability < 100) item.durability = 100; }
           const isBroken = !unbreakable && !!(item.broken || (item.durability != null && item.durability <= 0));
           if (isBroken) item.broken = true;
-          const sellAmt = isBroken ? getBrokenScrapSellValue(item) : (item.sellValue || 20);
+          const isStarGift = isStarStudentPendant(item);
+          const sellAmt = isBroken ? getBrokenScrapSellValue(item) : (isStarGift ? 100 : (item.sellValue || 20));
+          const sellLabel = isBroken ? `Scrap (+${sellAmt} 🪙)` : (isStarGift ? `Sell (+100 CP)` : `Sell (+${sellAmt} 🪙)`);
           return `
           <div data-hover-gear-uid="${item.uid}" class="p-3 rounded-xl border-2 rarity-${item.rarity} flex flex-col justify-between gap-2 cursor-pointer hover:ring-2 hover:ring-amber-400/70 transition ${isBroken ? 'opacity-75' : ''}">
             <div>
@@ -7888,7 +7870,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
                 ? `<button type="button" disabled class="flex-1 py-1.5 rounded-lg bg-slate-800 text-slate-500 font-extrabold text-xs cursor-not-allowed">Cannot Equip</button>`
                 : `<button type="button" data-equip-uid="${item.uid}" class="flex-1 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition">Equip Now</button>`}
               <button type="button" data-sell-uid="${item.uid}" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-900 text-slate-200 text-xs font-bold transition">
-                ${isBroken ? `Scrap (+${sellAmt} 🪙)` : `Sell (+${sellAmt} 🪙)`}
+                ${sellLabel}
               </button>
             </div>
           </div>
@@ -7931,9 +7913,9 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           ? ``
           : `<button type="button" data-buy-exclusive-gold="${offer.id}" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs">🪙 ${offer.priceGold.toLocaleString()}</button>`;
         const tag = offer.rarity === "LauSir" ? "(Lau Sir Certified • CP Only)"
-          : (offer.shopScaled ? `(Progress tier ${offer.lootTier} · 1.15× drops)` : "(Shop Exclusive)");
+          : (offer.shopScaled ? `(Lv scale ${offer.lootTier} · 1.15× drops)` : "(Shop Exclusive)");
         const tierNote = offer.shopScaled
-          ? `<div class="text-[10px] text-emerald-300/90 mt-0.5">Scales with clears/level · better than dungeon loot</div>`
+          ? `<div class="text-[10px] text-emerald-300/90 mt-0.5">Scales with your level · better than dungeon loot</div>`
           : ``;
         return `
         <div data-hover-shop-id="${offer.id}" class="p-3 rounded-xl border-2 rarity-${offer.rarity} flex items-center justify-between gap-2 cursor-pointer hover:ring-2 hover:ring-amber-400/60 transition">
@@ -8768,13 +8750,13 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         saveDatabase();
         renderAll();
         playSfx("legendary");
-        showToast(`⭐ Gifted Lau Sir's star student pendant to ${stu.name}! (scales with level)`, "amber");
+        showToast(`⭐ Gifted Lau Sir's star student pendant to ${stu.name}! (scales while Class Rank ${stu.classRank || 1})`, "amber");
         showRoyalDecreeModal(
           "⭐",
           "Teacher Gift Sent!",
           `<p class="font-bold text-fuchsia-300">Lau Sir's star student pendant</p>
            <p class="text-sm text-slate-200 mt-1">Delivered to <strong>${stu.name}</strong>'s backpack (or refreshed if already owned).</p>
-           <p class="text-xs text-amber-200 mt-2">Stats = 1.5× Exotic accessory at their level scale (Lv.${stu.level}). Grows automatically on level-up.</p>`
+           <p class="text-xs text-amber-200 mt-2">Stats = 1.5× Exotic accessory at Lv.${stu.level}. Grows on level-up while they remain Social Class Rank <strong>${stu.classRank || 1}</strong>. Sellable for 100 CP.</p>`
         );
       });
 
@@ -9308,12 +9290,20 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           if (idx !== -1) {
             const item = stu.inventory.splice(idx, 1)[0];
             const isBroken = !!(item.broken || item.durability <= 0);
+            if (!isBroken && isStarStudentPendant(item)) {
+              stu.cp = (stu.cp || 0) + 100;
+              playSfx("click");
+              saveDatabase();
+              renderAll();
+              showToast(`🎓 Sold ${item.name} for +100 CP!`, "cyan");
+            } else {
             const val = isBroken ? getBrokenScrapSellValue(item) : (item.sellValue || 20);
             stu.gold += val;
             playSfx("click");
             saveDatabase();
             renderAll();
             showToast(isBroken ? `🪙 Scrapped broken ${item.name} for +${val} Gold (5%)!` : `🪙 Sold ${item.name} for +${val} Gold!`, "amber");
+            }
           }
           return;
         }
