@@ -1934,7 +1934,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
           <div class="flex items-center justify-between">
             <div>
               <h2 class="font-medieval text-lg font-bold text-amber-300">🔨 Master Grom • Gear Artisan</h2>
-              <p class="text-xs text-slate-400">Combat wears down gear durability. Damaged gear loses power at &lt;50%. At 0% it <strong>permanently shatters</strong> — unequipped, unusable, unrepairable (scrap sell only)!</p>
+              <p class="text-xs text-slate-400">Gear loses <strong>5% durability</strong> on a successful dungeon clear (final boss) and <strong>10%</strong> if you fall in a dungeon. Damaged gear loses power at &lt;50%. At 0% it <strong>permanently shatters</strong> — unequipped, unusable, unrepairable (scrap sell only)!</p>
             </div>
             <span class="text-3xl">👨‍🏭</span>
           </div>
@@ -6575,7 +6575,6 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         const stats = computeHeroStats(stu);
         const trapDmg = Math.max(5, Math.round(stats.maxHp * 0.14));
         stu.currentHp = Math.max(1, stu.currentHp - trapDmg);
-        damageEquippedDurability(2);
         playSfx("danger");
         appendLog(`⚠️ Ambush Spike Trap in ${room.name}! Took ${trapDmg} damage and -2 gear durability.`, "rose");
       } else if (room.type === "deadend") {
@@ -6810,7 +6809,6 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           logExtras.push(`💧 Mana Siphon +${mpGain} MP`);
         }
 
-        damageEquippedDurability(1);
 
         const enemyCard = document.getElementById("enemyCombatCard");
         if (enemyCard) {
@@ -6874,8 +6872,6 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
 
         const enemyDmg = Math.max(5, Math.round(rawEnemyDmg));
         stu.currentHp = Math.max(0, stu.currentHp - enemyDmg);
-        damageEquippedDurability(combatState.isBoss ? 2 : 1);
-
         let reflectText = "";
         if (traits.includes("Thorns")) {
           const thornsDmg = Math.max(1, Math.round(enemyDmg * 0.15));
@@ -6998,6 +6994,9 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
             const conqueredName = currentDungeon.name;
             // Full run clear only (final boss) increments diminishing counter
             stu.ClearedDungeons[currentDungeon.id] = (stu.ClearedDungeons[currentDungeon.id] || 0) + 1;
+            // 5% durability wear on successful dungeon clear (final boss only; Novice mid-bosses skip)
+            damageEquippedDurability(5);
+            appendLog(`⚙️ Equipped gear wore −5% durability from the dungeon clear.`, "slate");
             if (currentDungeon.multiBoss) {
               setDungeonCheckpoint(stu, currentDungeon.id, { lastBossCleared: 0, runId: null });
             }
@@ -7058,6 +7057,9 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         const stats = computeHeroStats(stu);
         stu.currentHp = stats.maxHp;
         stu.currentMp = stats.maxMana;
+        // 10% durability wear on dungeon defeat (city teleport)
+        damageEquippedDurability(10);
+        appendLog(`⚙️ Equipped gear wore −10% durability from defeat.`, "rose");
         const fellIn = currentDungeon;
         const cp = fellIn ? getDungeonCheckpoint(stu, fellIn.id) : null;
         const multiCpNote = (fellIn && fellIn.multiBoss && cp && cp.lastBossCleared > 0)
