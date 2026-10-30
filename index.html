@@ -736,6 +736,26 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
     .hit-shake {
       animation: shakeHit 0.35s ease-in-out;
     }
+    .presence-dot {
+      display: inline-block;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 9999px;
+      flex-shrink: 0;
+      box-shadow: 0 0 6px rgba(52, 211, 153, 0.85);
+      background: #34d399;
+      vertical-align: middle;
+    }
+    .presence-dot-offline {
+      display: inline-block;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 9999px;
+      flex-shrink: 0;
+      background: #475569;
+      opacity: 0.55;
+      vertical-align: middle;
+    }
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #111827; }
     ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
@@ -3070,6 +3090,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
           <button type="button" data-lb-sort="cp" class="lb-sort-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold text-[11px] transition">CP</button>
           <button type="button" data-lb-sort="level" class="lb-sort-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold text-[11px] transition">Level</button>
           <button type="button" data-lb-sort="gold" class="lb-sort-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold text-[11px] transition">Gold</button>
+          <button type="button" data-lb-sort="power" class="lb-sort-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold text-[11px] transition">Power</button>
         </div>
 
         <div class="overflow-x-auto rounded-xl border border-slate-800">
@@ -3080,13 +3101,14 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
                 <th class="py-2.5 px-2 font-bold">Hero</th>
                 <th class="py-2.5 px-2 font-bold">Social Class</th>
                 <th class="py-2.5 px-2 font-bold">Level</th>
+                <th class="py-2.5 px-2 font-bold">Power</th>
                 <th class="py-2.5 px-2 font-bold">CP</th>
                 <th class="py-2.5 px-2 font-bold">Gold</th>
               </tr>
             </thead>
             <tbody id="leaderboardTableBody" class="divide-y divide-slate-800/70">
               <tr>
-                <td colspan="6" class="py-8 text-center text-xs text-slate-400">Loading classroom roster…</td>
+                <td colspan="7" class="py-8 text-center text-xs text-slate-400">Loading classroom roster…</td>
               </tr>
             </tbody>
           </table>
@@ -5073,6 +5095,15 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       pollInterval: null
     };
 
+    // Online presence (REST heartbeat — app does not use Firebase JS SDK / onDisconnect)
+    const PRESENCE_HEARTBEAT_MS = 35000;
+    const PRESENCE_ONLINE_MS = 120000; // online if lastSeen within 120s
+    const PRESENCE_POLL_MS = 15000;
+    let presenceMap = {}; // studentId -> { name, lastSeen }
+    let presenceHeartbeatTimer = null;
+    let presencePollTimer = null;
+    let presenceWriting = false;
+
     function saveCloudConfig() {
       try {
         localStorage.setItem(CLOUD_CFG_KEY, JSON.stringify(cloudConfig));
@@ -5343,8 +5374,10 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           students: toFirebaseSafe(db.students || [])
         };
 
+        // Use PATCH for normal sync so sibling keys (e.g. presence/) are not wiped.
+        // PUT only when forceOverwrite (empty cloud bootstrap).
         const putRes = await fetch(url, {
-          method: "PUT",
+          method: forceOverwrite ? "PUT" : "PATCH",
           headers: buildCloudHeaders(true),
           body: JSON.stringify(payloadToPush)
         });
@@ -5387,6 +5420,156 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           }
         }, 8000);
       }
+    }
+
+
+    function getCloudRoomId() {
+      return (cloudConfig.roomId || "LS_CLASS_2026").trim().replace(/[^a-zA-Z0-9_-]/g, "_") || "LS_CLASS_2026";
+    }
+
+    function buildPresenceBaseUrl() {
+      if (!cloudConfig.enabled || !cloudConfig.endpoint || cloudConfig.provider !== "firebase") return "";
+      const base = normalizeCloudEndpoint(cloudConfig.endpoint, cloudConfig.provider);
+      if (!base) return "";
+      const room = getCloudRoomId();
+      let url = `${base.replace(/\/$/, "")}/classrooms/${room}/presence`;
+      if (cloudConfig.apiKey) {
+        url += (url.includes("?") ? "&" : "?") + `auth=${encodeURIComponent(cloudConfig.apiKey.trim())}`;
+      }
+      return url;
+    }
+
+    function buildPresenceStudentUrl(studentId) {
+      const base = buildPresenceBaseUrl();
+      if (!base || !studentId) return "";
+      // strip query, append student, reattach auth
+      const qIdx = base.indexOf("?");
+      const path = qIdx >= 0 ? base.slice(0, qIdx) : base;
+      const query = qIdx >= 0 ? base.slice(qIdx) : "";
+      return `${path}/${encodeURIComponent(studentId)}.json${query}`;
+    }
+
+    function isStudentOnline(studentId) {
+      if (!studentId) return false;
+      const entry = presenceMap[studentId];
+      if (!entry || !entry.lastSeen) return false;
+      return (Date.now() - Number(entry.lastSeen)) <= PRESENCE_ONLINE_MS;
+    }
+
+    function presenceDotHtml(studentId, titleOnline = "Online", titleOffline = "Offline") {
+      if (isStudentOnline(studentId)) {
+        return `<span class="presence-dot mr-1.5" title="${titleOnline}" aria-label="${titleOnline}"></span>`;
+      }
+      return `<span class="presence-dot-offline mr-1.5" title="${titleOffline}" aria-label="${titleOffline}"></span>`;
+    }
+
+    async function writeOwnPresence() {
+      if (presenceWriting) return;
+      const stu = getActiveStudent();
+      if (!stu || !stu.id) return;
+      const url = buildPresenceStudentUrl(stu.id);
+      if (!url) return;
+      presenceWriting = true;
+      try {
+        const payload = { name: String(stu.name || "Hero"), lastSeen: Date.now() };
+        await fetch(url, {
+          method: "PUT",
+          headers: buildCloudHeaders(true),
+          body: JSON.stringify(payload),
+          cache: "no-store"
+        });
+        presenceMap[stu.id] = payload;
+      } catch (e) {
+        // silent — presence is best-effort
+      } finally {
+        presenceWriting = false;
+      }
+    }
+
+    async function clearOwnPresence(studentId) {
+      const id = studentId || (db.activeStudentId || null);
+      if (!id) return;
+      const url = buildPresenceStudentUrl(id);
+      if (!url) return;
+      try {
+        await fetch(url, { method: "DELETE", headers: buildCloudHeaders(false), cache: "no-store" });
+      } catch (e) {}
+      if (presenceMap[id]) delete presenceMap[id];
+    }
+
+    function stopPresenceHeartbeat() {
+      if (presenceHeartbeatTimer) {
+        clearInterval(presenceHeartbeatTimer);
+        presenceHeartbeatTimer = null;
+      }
+    }
+
+    function startPresenceHeartbeat() {
+      stopPresenceHeartbeat();
+      const stu = getActiveStudent();
+      if (!stu || !stu.id) return;
+      if (!buildPresenceBaseUrl()) return;
+      writeOwnPresence();
+      presenceHeartbeatTimer = setInterval(() => {
+        if (!document.hidden) writeOwnPresence();
+      }, PRESENCE_HEARTBEAT_MS);
+    }
+
+    async function pullPresenceMap(silent = true) {
+      const base = buildPresenceBaseUrl();
+      if (!base) return false;
+      const qIdx = base.indexOf("?");
+      const path = qIdx >= 0 ? base.slice(0, qIdx) : base;
+      const query = qIdx >= 0 ? base.slice(qIdx) : "";
+      const url = `${path}.json${query}`;
+      try {
+        const res = await fetch(url, { method: "GET", headers: buildCloudHeaders(false), cache: "no-store" });
+        if (!res.ok) return false;
+        const data = await res.json();
+        const next = {};
+        if (data && typeof data === "object") {
+          for (const [id, val] of Object.entries(data)) {
+            if (!val || typeof val !== "object") continue;
+            next[id] = { name: String(val.name || ""), lastSeen: Number(val.lastSeen || 0) };
+          }
+        }
+        presenceMap = next;
+        // Re-render only the views that show dots (avoid full renderAll thrash)
+        renderLeaderboard();
+        if (typeof teacherUnlocked !== "undefined" && teacherUnlocked) {
+          renderTeacherPortal();
+        }
+        return true;
+      } catch (e) {
+        if (!silent) console.warn("presence pull failed", e);
+        return false;
+      }
+    }
+
+    function startPresencePolling() {
+      if (presencePollTimer) clearInterval(presencePollTimer);
+      if (!buildPresenceBaseUrl()) return;
+      pullPresenceMap(true);
+      presencePollTimer = setInterval(() => {
+        if (!document.hidden) pullPresenceMap(true);
+      }, PRESENCE_POLL_MS);
+    }
+
+    function onStudentBecameActive() {
+      startPresenceHeartbeat();
+      writeOwnPresence();
+      // optimistic local online so own row lights up immediately
+      const stu = getActiveStudent();
+      if (stu && stu.id) {
+        presenceMap[stu.id] = { name: String(stu.name || "Hero"), lastSeen: Date.now() };
+      }
+    }
+
+    async function onStudentLoggedOut(prevStudentId) {
+      stopPresenceHeartbeat();
+      await clearOwnPresence(prevStudentId);
+      renderLeaderboard();
+      if (teacherUnlocked) renderTeacherPortal();
     }
 
     function saveDatabase() {
@@ -5459,7 +5642,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
     // 4. RUNTIME DUNGEON & COMBAT STATE (PRESERVED ACROSS TAB SWITCHING!)
     // =========================================================================
     let activeTab = "world";
-    let leaderboardSortMode = "class"; // class | cp | level | gold
+    let leaderboardSortMode = "class"; // class | cp | level | gold | power
     let teacherUnlocked = false;
 
     let currentDungeon = null;
@@ -7236,12 +7419,21 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       if (students.length === 0) {
         body.innerHTML = `
           <tr>
-            <td colspan="6" class="py-8 text-center text-xs text-slate-400">
+            <td colspan="7" class="py-8 text-center text-xs text-slate-400">
               No heroes on the roster yet. Ask your Teacher to create characters, or hit <strong>Refresh Cloud</strong>.
             </td>
           </tr>`;
         return;
       }
+
+      const powerCache = new Map();
+      const getPower = (s) => {
+        if (!s || !s.id) return 0;
+        if (powerCache.has(s.id)) return powerCache.get(s.id);
+        const p = computeHeroStats(s).gearPower || 0;
+        powerCache.set(s.id, p);
+        return p;
+      };
 
       const mode = leaderboardSortMode || "class";
       students.sort((a, b) => {
@@ -7249,10 +7441,12 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         const aCp = a.cp || 0, bCp = b.cp || 0;
         const aLv = a.level || 1, bLv = b.level || 1;
         const aGold = a.gold || 0, bGold = b.gold || 0;
+        const aPow = getPower(a), bPow = getPower(b);
         const byName = String(a.name || "").localeCompare(String(b.name || ""), undefined, { sensitivity: "base" });
         if (mode === "cp") return (bCp - aCp) || (bRank - aRank) || (bLv - aLv) || byName;
         if (mode === "level") return (bLv - aLv) || (bRank - aRank) || (bCp - aCp) || byName;
         if (mode === "gold") return (bGold - aGold) || (bRank - aRank) || (bCp - aCp) || byName;
+        if (mode === "power") return (bPow - aPow) || (bRank - aRank) || (bCp - aCp) || byName;
         // default: Social Class (higher rank first), then CP
         return (bRank - aRank) || (bCp - aCp) || (bLv - aLv) || byName;
       });
@@ -7262,14 +7456,17 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         const rankNum = idx + 1;
         const cObj = getSocialClassObj(s.classRank);
         const isYou = s.id && s.id === db.activeStudentId;
+        const pow = getPower(s);
+        const online = isStudentOnline(s.id);
         return `
           <tr class="${isYou ? "bg-amber-500/15 ring-1 ring-inset ring-amber-400/40" : "hover:bg-slate-950/60"}">
             <td class="py-2.5 px-2 font-extrabold ${rankNum <= 3 ? "text-amber-300" : "text-slate-300"}">${medal(rankNum)}</td>
             <td class="py-2.5 px-2 font-bold text-white">
-              ${s.name || "Unknown"}${isYou ? ' <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 ml-1">You</span>' : ""}
+              <span class="inline-flex items-center">${presenceDotHtml(s.id)}${s.name || "Unknown"}</span>${isYou ? ' <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 ml-1">You</span>' : ""}${online ? "" : ""}
             </td>
             <td class="py-2.5 px-2 text-amber-300 font-semibold">#${cObj.id} ${cObj.name}</td>
             <td class="py-2.5 px-2"><strong class="text-emerald-400">Lv. ${s.level || 1}</strong></td>
+            <td class="py-2.5 px-2 text-amber-200 font-bold">${pow} ⚡</td>
             <td class="py-2.5 px-2 text-cyan-300 font-bold">${s.cp || 0}</td>
             <td class="py-2.5 px-2 text-amber-200 font-semibold">${s.gold || 0} 🪙</td>
           </tr>`;
@@ -7314,7 +7511,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         return `
           <tr class="${isActive ? 'bg-amber-500/10' : 'hover:bg-slate-950/60'}">
             <td class="py-2.5 px-2 font-bold text-white">
-              ${s.name} ${isActive ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 ml-1">Logged In</span>' : ''}
+              <span class="inline-flex items-center">${presenceDotHtml(s.id)}${s.name}</span> ${isActive ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 ml-1">Logged In</span>' : ''}
             </td>
             <td class="py-2.5 px-2">
               <span class="px-2 py-0.5 rounded bg-slate-950 border border-amber-400/50 font-mono font-extrabold text-amber-300 text-xs">${s.pinCode || '----'}</span>
@@ -7457,7 +7654,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           errEl?.classList.add("hidden");
           db.activeStudentId = stu.id; teacherUnlocked = false; combatState.active = false; currentDungeon = null;
           document.getElementById("entryLoginScreen").classList.add("hidden");
-          switchTab("world"); playSfx("fanfare"); saveDatabase(); renderAll();
+          switchTab("world"); playSfx("fanfare"); saveDatabase(); onStudentBecameActive(); renderAll();
           showToast(`🔓 Welcome back, Hero ${stu.name}!`, "emerald");
         });
         bind("btnGateTeacherLoginSubmit", () => {
@@ -7471,7 +7668,9 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           showToast("🎓 Teacher Command Center Unlocked!", "emerald");
         });
         bind("btnReturnToLoginGate", () => {
+          const prevId = db.activeStudentId;
           db.activeStudentId = null; teacherUnlocked = false; combatState.active = false; currentDungeon = null;
+          onStudentLoggedOut(prevId);
           showLoginGateSubpage("role");
           document.getElementById("entryLoginScreen").classList.remove("hidden");
           renderAll();
@@ -7484,7 +7683,23 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       if (cloudConfig.enabled && cloudConfig.endpoint) {
         pullFromCloud(true, false);
         startCloudAutoPolling();
+        startPresencePolling();
       }
+      // Clear presence if tab/window closes while logged in (best-effort; REST has no onDisconnect)
+      window.addEventListener("beforeunload", () => {
+        const id = db.activeStudentId;
+        if (!id) return;
+        const url = buildPresenceStudentUrl(id);
+        if (!url) return;
+        try {
+          if (navigator.sendBeacon) {
+            // DELETE via fetch keepalive as sendBeacon can't set method DELETE reliably
+            fetch(url, { method: "DELETE", headers: buildCloudHeaders(false), keepalive: true, cache: "no-store" });
+          } else {
+            fetch(url, { method: "DELETE", headers: buildCloudHeaders(false), keepalive: true, cache: "no-store" });
+          }
+        } catch (e) {}
+      });
 
       document.querySelectorAll(".nav-tab-btn").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -7841,6 +8056,8 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           return;
         }
         errEl.classList.add("hidden");
+        const prevId = db.activeStudentId;
+        if (prevId && prevId !== stu.id) { clearOwnPresence(prevId); }
         db.activeStudentId = stu.id;
         combatState.active = false;
         currentDungeon = null;
@@ -7848,6 +8065,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         document.getElementById("accountModal").classList.add("hidden");
         playSfx("fanfare");
         saveDatabase();
+        onStudentBecameActive();
         renderAll();
         showToast(`🔓 Logged in as ${stu.name}!`, "emerald");
       });
@@ -7877,10 +8095,12 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
 
       // Student Logout
       document.getElementById("btnStudentLogout").addEventListener("click", () => {
+        const prevId = db.activeStudentId;
         db.activeStudentId = null;
         combatState.active = false;
         currentDungeon = null;
         document.getElementById("accountModal").classList.add("hidden");
+        onStudentLoggedOut(prevId);
         saveDatabase();
         renderAll();
         showToast("Logged out of student profile.", "sky");
@@ -8041,6 +8261,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         cloudConfig = { enabled: true, provider, endpoint, roomId, apiKey, autoSync };
         saveCloudConfig();
         startCloudAutoPolling();
+        startPresencePolling();
         const ok = await pullFromCloud(false, false);
         if (ok) {
           await pushToCloud(true, false);
@@ -8175,12 +8396,15 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         if (!name) return showToast("Enter your hero name!", "rose");
         const s = createStudentProfile(name, gender, 1, 25, 250);
         db.students.push(s);
+        const prevId = db.activeStudentId;
+        if (prevId && prevId !== s.id) { clearOwnPresence(prevId); }
         db.activeStudentId = s.id;
         combatState.active = false;
         currentDungeon = null;
         document.getElementById("modalNewStudentName").value = "";
         document.getElementById("accountModal").classList.add("hidden");
         saveDatabase();
+        onStudentBecameActive();
         renderAll();
         showToast(`🎉 Created & switched to hero ${name}!`, "emerald");
       });
