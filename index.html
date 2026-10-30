@@ -4504,6 +4504,47 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
     }
 
 
+    function migrateLauSirCertifiedStats(dbObj) {
+      if (!dbObj || !Array.isArray(dbObj.students)) return false;
+      if (dbObj.lauSirStatsMigrationV2) return false;
+      const templates = {};
+      for (const tpl of SHOP_EXCLUSIVE_ITEMS) {
+        if (tpl && typeof tpl.id === "string" && tpl.id.startsWith("lausir_")) {
+          templates[tpl.id] = tpl;
+        }
+      }
+      let changed = false;
+      const refresh = (gear) => {
+        if (!gear || typeof gear !== "object") return;
+        const sid = (typeof gear.shopId === "string" && gear.shopId) ||
+          (typeof gear.id === "string" && gear.id.startsWith("lausir_") ? gear.id : null);
+        if (!sid || !templates[sid]) return;
+        const tpl = templates[sid];
+        if (gear.atk !== tpl.atk || gear.def !== tpl.def || gear.hp !== tpl.hp || gear.mp !== tpl.mp) {
+          gear.atk = tpl.atk;
+          gear.def = tpl.def;
+          gear.hp = tpl.hp;
+          gear.mp = tpl.mp;
+          changed = true;
+        }
+        if (gear.unbreakable !== true) {
+          gear.unbreakable = true;
+          changed = true;
+        }
+      };
+      for (const stu of dbObj.students) {
+        if (!stu) continue;
+        if (stu.equipped && typeof stu.equipped === "object") {
+          for (const slot of Object.keys(stu.equipped)) refresh(stu.equipped[slot]);
+        }
+        if (Array.isArray(stu.inventory)) {
+          for (const item of stu.inventory) refresh(item);
+        }
+      }
+      dbObj.lauSirStatsMigrationV2 = true;
+      return true;
+    }
+
     function scaleStatsByRarity(slot, baseSub, rarity, tierScale) {
       const powerMult = RARITY_POWER_MULT[rarity] != null ? RARITY_POWER_MULT[rarity] : 1;
       const blended = blendSubtypeStats(slot, baseSub);
@@ -4701,13 +4742,13 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       // Legendary — ~25000–40000 gold (was 380–450k)
       { id: "shop_w2", name: "Legendary Greatsword", slot: "Weapon", icon: "🗡️", rarity: "Legendary", atk: 185, def: 65, hp: 420, mp: 95, traits: ["Dragon Slayer", "Vampiric", "Devastation"], priceGold: 28000, priceCP: 1273 },
       { id: "shop_a1", name: "Legendary Amulet", slot: "Accessory", icon: "💎", rarity: "Legendary", atk: 125, def: 110, hp: 560, mp: 180, traits: ["Fortune's Favor", "Holy Ward", "Executioner"], priceGold: 36000, priceCP: 1636 },
-      // v1.1 Easter egg — Lau Sir Certified set (5× best shop piece per slot). CP-only. Visible at classRank >= 16.
-      { id: "lausir_w", name: "Lau Sir Certified Greatsword", slot: "Weapon", icon: "🗡️", rarity: "LauSir", atk: 925, def: 325, hp: 2100, mp: 475, traits: ["Dragon Slayer", "Vampiric", "Devastation"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16, unbreakable: true },
-      { id: "lausir_h", name: "Lau Sir Certified Crown", slot: "Helmet", icon: "👑", rarity: "LauSir", atk: 220, def: 290, hp: 975, mp: 425, traits: ["Arcane Surge", "Mana Siphon", "Critical Eye"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16, unbreakable: true },
-      { id: "lausir_c", name: "Lau Sir Certified Plate", slot: "Chestplate", icon: "🥋", rarity: "LauSir", atk: 175, def: 440, hp: 1550, mp: 210, traits: ["Fortified", "Vitality", "Scale Shielding"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16, unbreakable: true },
-      { id: "lausir_b", name: "Lau Sir Certified Greaves", slot: "Gauntlets/Boots", icon: "🥾", rarity: "LauSir", atk: 150, def: 210, hp: 650, mp: 110, traits: ["Swiftness", "Berserker", "Critical Eye"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16, unbreakable: true },
-      { id: "lausir_s", name: "Lau Sir Certified Bulwark", slot: "Shield", icon: "🛡️", rarity: "LauSir", atk: 140, def: 525, hp: 1750, mp: 175, traits: ["Scale Shielding", "Thorns", "Fortified"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16, unbreakable: true },
-      { id: "lausir_a", name: "Lau Sir Certified Amulet", slot: "Accessory", icon: "💎", rarity: "LauSir", atk: 625, def: 550, hp: 2800, mp: 900, traits: ["Fortune's Favor", "Holy Ward", "Executioner"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16, unbreakable: true }
+      // v1.1 Easter egg — Lau Sir Certified set (~3× Guild Sanctum Legendary drop per slot). CP-only. Visible at classRank >= 16.
+      { id: "lausir_w", name: "Lau Sir Certified Greatsword", slot: "Weapon", icon: "🗡️", rarity: "LauSir", atk: 60950, def: 11100, hp: 40050, mp: 17050, traits: ["Dragon Slayer", "Vampiric", "Devastation"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16, unbreakable: true },
+      { id: "lausir_h", name: "Lau Sir Certified Crown", slot: "Helmet", icon: "👑", rarity: "LauSir", atk: 12700, def: 29600, hp: 85800, mp: 39150, traits: ["Arcane Surge", "Mana Siphon", "Critical Eye"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16, unbreakable: true },
+      { id: "lausir_c", name: "Lau Sir Certified Plate", slot: "Chestplate", icon: "🥋", rarity: "LauSir", atk: 19050, def: 70300, hp: 209350, mp: 32950, traits: ["Fortified", "Vitality", "Scale Shielding"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16, unbreakable: true },
+      { id: "lausir_b", name: "Lau Sir Certified Greaves", slot: "Gauntlets/Boots", icon: "🥾", rarity: "LauSir", atk: 16450, def: 32400, hp: 90600, mp: 23700, traits: ["Swiftness", "Berserker", "Critical Eye"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16, unbreakable: true },
+      { id: "lausir_s", name: "Lau Sir Certified Bulwark", slot: "Shield", icon: "🛡️", rarity: "LauSir", atk: 4500, def: 63200, hp: 162950, mp: 12800, traits: ["Scale Shielding", "Thorns", "Fortified"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16, unbreakable: true },
+      { id: "lausir_a", name: "Lau Sir Certified Amulet", slot: "Accessory", icon: "💎", rarity: "LauSir", atk: 27900, def: 25600, hp: 122800, mp: 47150, traits: ["Fortune's Favor", "Holy Ward", "Executioner"], priceGold: 0, priceCP: 2000, cpOnly: true, requireClassRank: 16, unbreakable: true }
     ];
 
     const COSMETIC_BOXES = [
@@ -5010,7 +5051,9 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
 
     let db = loadDatabase();
     if (!Array.isArray(db.deletedStudentIds)) db.deletedStudentIds = [];
-    if (migrateGearNames(db)) {
+    let _dbMigrated = migrateGearNames(db);
+    if (migrateLauSirCertifiedStats(db)) _dbMigrated = true;
+    if (_dbMigrated) {
       try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch (e) {}
     }
 
@@ -5277,6 +5320,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         db.activeStudentId = null;
       }
       migrateGearNames(db);
+      migrateLauSirCertifiedStats(db);
       try {
         localStorage.setItem(DB_KEY, JSON.stringify(db));
       } catch (e) {}
