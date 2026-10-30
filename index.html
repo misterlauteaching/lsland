@@ -989,7 +989,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
             <h2 class="font-medieval text-lg sm:text-xl font-bold text-amber-300 drop-shadow">🏰 Dungeon Progression</h2>
             <span class="text-xs bg-slate-950/80 px-2.5 py-1 rounded-full text-slate-300 border border-slate-700">Your Gear Power: <strong id="worldGearPowerBadge" class="text-amber-400">455</strong> ⚡</span>
           </div>
-          <p class="text-[11px] text-slate-400 mb-3">Climb 1→9 from the Armory to Guild Sanctum. Open dungeons unlocked Day 1 · Sanctum needs Class Rank 13+.</p>
+          <p class="text-[11px] text-slate-400 mb-3">Climb 0→9 from Novice Meadows to Guild Sanctum. Open dungeons unlocked Day 1 · Sanctum needs Class Rank 13+.</p>
           <div id="dungeonCardsGrid" class="flex flex-col gap-2 relative">
             <!-- Dungeon cards rendered by renderWorldAndDungeon() from DUNGEONS -->
           </div>
@@ -1229,7 +1229,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
                 <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400">📜 Battle &amp; Exploration Chronicle</h4>
                 <button id="btnClearCombatLog" type="button" class="text-[11px] text-slate-400 hover:text-white">Clear</button>
               </div>
-              <div id="adventureLogContainer" class="flex-1 overflow-y-auto space-y-1.5 text-xs pr-1 font-mono"><div class="text-amber-300 leading-snug border-b border-slate-800/60 pb-1">👑 Welcome to Chronicles of the LS Land v1.1! Open dungeons await — conquer them, then face the elite Guild Sanctum (Class Rank 13+). Check your Loadout or enter the Forgotten Armory!</div>
+              <div id="adventureLogContainer" class="flex-1 overflow-y-auto space-y-1.5 text-xs pr-1 font-mono"><div class="text-amber-300 leading-snug border-b border-slate-800/60 pb-1">👑 Welcome to Chronicles of the LS Land v1.1! Start in Novice Meadows (3-boss checkpoints), then climb the open dungeons — Guild Sanctum awaits Class Rank 13+. Check your Loadout or enter the Forgotten Armory!</div>
                 <!-- Log messages -->
               </div>
             </div>
@@ -4724,6 +4724,26 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
     // v1.1 — originals retuned for ~70k gearPower ladder; citadel ~100k sits just under tempest 120k
     const DUNGEONS = [
       {
+        id: "noviceland",
+        name: "0. Novice Meadows of LS",
+        icon: "🌱",
+        recPower: 600,
+        tierMult: 0.85,
+        lootTierMult: 0.75,
+        roomsCount: 12,
+        biasSlots: ["Weapon", "Helmet", "Gauntlets/Boots"],
+        biasDesc: "60% Drop Bias: Starter kit slots",
+        monsterPool: ["dire_wolf", "goblin_marauder", "giant_spider", "dark_bandit"],
+        multiBoss: true,
+        bosses: [
+          { name: "Bramble Pup Alpha", category: "Beasts", color: "#86efac", hp: 380, atk: 42, def: 28, roomIndex: 3 },
+          { name: "Scarecrow Bandit King", category: "Humanoid", color: "#fbbf24", hp: 620, atk: 58, def: 42, roomIndex: 7 },
+          { name: "Meadowstone Colossus", category: "Constructs", color: "#a3e635", hp: 980, atk: 72, def: 55, roomIndex: 11 }
+        ],
+        boss: { name: "Meadowstone Colossus", category: "Constructs", color: "#a3e635", hp: 980, atk: 72, def: 55 },
+        lore: "A forgiving training meadow for new LS heroes. Three milestone guardians with checkpoints — die and resume from the next boss, or restart to grind. Full-clear (boss 3) counts for reward depreciation."
+      },
+      {
         id: "armory",
         name: "1. Forgotten Armory",
         icon: "⚔️",
@@ -4854,6 +4874,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
     ];
 
     const MAIN_QUESTS = [
+      { id: "mq_0", title: "Ch. 0: First Steps in Novice Land", desc: "Train in the Novice Meadows of LS. Defeat all three milestone guardians (Bramble Pup → Scarecrow King → Meadowstone Colossus) to earn your first Shard of Courage.", targetDungeon: "noviceland", rewardGold: 400, rewardExp: 200, rewardCP: 10 },
       { id: "mq_1", title: "Ch. 1: Reclaim the Forgotten Armory", desc: "Explore the Forgotten Armory maze and defeat Grimjaw the Iron Cleaver to recover the 1st Shard of Wisdom.", targetDungeon: "armory", rewardGold: 1200, rewardExp: 600, rewardCP: 20 },
       { id: "mq_2", title: "Ch. 2: Purge the Cursed Catacombs", desc: "Navigate the undead crypts and vanquish Arch-Lich Malakor for the 2nd Shard.", targetDungeon: "catacombs", rewardGold: 2500, rewardExp: 1200, rewardCP: 30 },
       { id: "mq_3", title: "Ch. 3: Breach the Ironclad Keep", desc: "Shatter the Colossus Vanguard MK-IV inside Ironclad Keep to claim the 3rd Shard.", targetDungeon: "ironclad", rewardGold: 5000, rewardExp: 2500, rewardCP: 45 },
@@ -5073,6 +5094,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         },
         exploredRooms: {},
         ClearedDungeons: {},
+        dungeonCheckpoints: {},
         questClaims: {},
         killCounts: { Beasts: 0, Humanoid: 0, Undead: 0, Constructs: 0, Demons: 0, Dragons: 0 },
         repairCount: 0,
@@ -5164,6 +5186,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       }
       if (!stu.exploredRooms || typeof stu.exploredRooms !== "object") stu.exploredRooms = {};
       if (!stu.ClearedDungeons || typeof stu.ClearedDungeons !== "object") stu.ClearedDungeons = {};
+      if (!stu.dungeonCheckpoints || typeof stu.dungeonCheckpoints !== "object") stu.dungeonCheckpoints = {};
       if (!stu.questClaims || typeof stu.questClaims !== "object") stu.questClaims = {};
       if (!stu.killCounts || typeof stu.killCounts !== "object") {
         stu.killCounts = { Beasts: 0, Humanoid: 0, Undead: 0, Constructs: 0, Demons: 0, Dragons: 0 };
@@ -5805,6 +5828,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       portalState: { currentStage: 1, safetyNetStage: 0, highestStage: 1, unbanked: { hp: 0, atk: 0, def: 0, mp: 0, gold: 0 }, stageClearCounts: {} },
       exploredRooms: {},
       ClearedDungeons: {},
+      dungeonCheckpoints: {},
       questClaims: {},
       killCounts: { Beasts: 0, Humanoid: 0, Undead: 0, Constructs: 0, Demons: 0, Dragons: 0 },
       repairCount: 0,
@@ -6329,12 +6353,55 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       "Forgotten Barracks", "Obsidian Shrine", "Rusting Portcullis", "Drafty Catwalk"
     ];
 
+    function getDungeonBossList(dungeon) {
+      if (!dungeon) return [];
+      if (Array.isArray(dungeon.bosses) && dungeon.bosses.length) return dungeon.bosses;
+      if (dungeon.boss) return [dungeon.boss];
+      return [];
+    }
+
+    function getBossForRoom(dungeon, room) {
+      const list = getDungeonBossList(dungeon);
+      if (room && room.bossIndex != null && list[room.bossIndex]) return list[room.bossIndex];
+      return list[list.length - 1] || dungeon.boss || null;
+    }
+
+    function getDungeonCheckpoint(stu, dungeonId) {
+      if (!stu.dungeonCheckpoints || typeof stu.dungeonCheckpoints !== "object") stu.dungeonCheckpoints = {};
+      return stu.dungeonCheckpoints[dungeonId] || null;
+    }
+
+    function setDungeonCheckpoint(stu, dungeonId, data) {
+      if (!stu.dungeonCheckpoints || typeof stu.dungeonCheckpoints !== "object") stu.dungeonCheckpoints = {};
+      stu.dungeonCheckpoints[dungeonId] = data;
+    }
+
     function buildDungeonMaze(dungeon) {
       const count = dungeon.roomsCount || 18;
+      const bossList = getDungeonBossList(dungeon);
+      const multi = !!(dungeon.multiBoss && bossList.length > 1);
+      let bossRoomIndices = [];
+      if (multi) {
+        bossRoomIndices = bossList.map((b, bi) => {
+          if (b.roomIndex != null) return Math.max(1, Math.min(count - 1, b.roomIndex));
+          return Math.floor(((bi + 1) / bossList.length) * (count - 1));
+        });
+        bossRoomIndices[bossList.length - 1] = count - 1;
+        // ensure unique ascending
+        for (let k = 1; k < bossRoomIndices.length; k++) {
+          if (bossRoomIndices[k] <= bossRoomIndices[k - 1]) {
+            bossRoomIndices[k] = Math.min(count - 1, bossRoomIndices[k - 1] + 1);
+          }
+        }
+        bossRoomIndices[bossList.length - 1] = count - 1;
+      }
+
       const nodes = [];
       for (let i = 0; i < count; i++) {
         const isStart = i === 0;
-        const isBoss = i === count - 1;
+        const bossOrd = multi ? bossRoomIndices.indexOf(i) : (i === count - 1 ? 0 : -1);
+        const isBoss = bossOrd >= 0;
+        const isFinalBoss = isBoss && (!multi || bossOrd === bossList.length - 1);
         let type = "monster";
         if (isStart) type = "entrance";
         else if (isBoss) type = "boss";
@@ -6343,7 +6410,8 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         else if (i % 7 === 2) type = "trap";
 
         let paths = [];
-        if (!isBoss && type !== "deadend") {
+        // Final boss: no forward paths. Mid-bosses keep paths so the run can continue after victory.
+        if (!isFinalBoss && type !== "deadend") {
           const nextMain = Math.min(count - 1, i + 1);
           const nextBranch1 = Math.min(count - 1, i + 2);
           const nextBranch2 = Math.max(0, Math.min(count - 2, i + (i % 2 === 0 ? 3 : -1)));
@@ -6359,19 +6427,23 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           paths[2].dir = "Right Route";
         }
 
+        const bossRef = isBoss ? bossList[bossOrd] : null;
+        const bossName = bossRef ? bossRef.name : (dungeon.boss && dungeon.boss.name) || "Boss";
         nodes.push({
           index: i,
-          name: isStart ? "Dungeon Entrance Gate" : (isBoss ? "Throne Chamber of " + dungeon.boss.name : ROOM_NAMES[i % ROOM_NAMES.length] + " #" + (i + 1)),
+          name: isStart ? "Dungeon Entrance Gate" : (isBoss ? ((multi ? `Milestone ${bossOrd + 1}/${bossList.length}: ` : "Throne Chamber of ") + bossName) : ROOM_NAMES[i % ROOM_NAMES.length] + " #" + (i + 1)),
           type: type,
           depth: Math.ceil((i + 1) / 3),
           cleared: isStart,
-          paths: paths
+          paths: paths,
+          bossIndex: isBoss ? bossOrd : null,
+          isFinalBoss: isFinalBoss
         });
       }
       return nodes;
     }
 
-    function enterDungeon(dungeonId) {
+    function enterDungeon(dungeonId, options = {}) {
       if (!requireLoggedInStudent()) return;
       const dungeon = DUNGEONS.find(d => d.id === dungeonId);
       if (!dungeon) return;
@@ -6389,17 +6461,76 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       if (lowDur) {
         showToast("⚠️ Some equipped gear is below 15% durability — it will shatter permanently at 0%!", "amber");
       }
+
+      const multi = !!(dungeon.multiBoss && getDungeonBossList(dungeon).length > 1);
+      const cp = multi ? getDungeonCheckpoint(stuGate, dungeon.id) : null;
+      if (multi && cp && (cp.lastBossCleared || 0) > 0 && !options.resumeChoice) {
+        showNoviceCheckpointModal(dungeon.id, cp);
+        return;
+      }
+
+      if (multi) {
+        if (options.resumeChoice === "restart" || !cp || !(cp.lastBossCleared > 0)) {
+          setDungeonCheckpoint(stuGate, dungeon.id, {
+            lastBossCleared: 0,
+            runId: "run_" + Date.now().toString(36)
+          });
+          saveDatabase();
+        }
+      }
+
       currentDungeon = dungeon;
       dungeonGraph = buildDungeonMaze(dungeon);
-      currentRoomIndex = 0;
       roomHistoryStack = [];
       combatState.active = false;
+
+      let startRoom = 0;
+      if (multi && options.resumeChoice === "resume") {
+        const liveCp = getDungeonCheckpoint(stuGate, dungeon.id) || { lastBossCleared: 0 };
+        const nextBoss = Math.max(0, Math.min(getDungeonBossList(dungeon).length - 1, liveCp.lastBossCleared || 0));
+        const bossRoom = dungeonGraph.findIndex(r => r.bossIndex === nextBoss);
+        startRoom = bossRoom >= 0 ? bossRoom : 0;
+        for (let i = 0; i < dungeonGraph.length; i++) {
+          if (i < startRoom) dungeonGraph[i].cleared = true;
+          if (dungeonGraph[i].bossIndex != null && dungeonGraph[i].bossIndex < nextBoss) {
+            dungeonGraph[i].cleared = true;
+          }
+        }
+      }
+
+      currentRoomIndex = startRoom;
 
       document.getElementById("worldMapView").classList.add("hidden");
       document.getElementById("dungeonActiveView").classList.remove("hidden");
 
-      appendLog(`🏰 Entered ${dungeon.name} (Rec. Gear Power: ${dungeon.recPower}). Choose wisely among the 3 paths in each chamber!`, "amber");
-      visitDungeonRoom(0, false);
+      const cpNow = multi ? getDungeonCheckpoint(stuGate, dungeon.id) : null;
+      const cpNote = multi && cpNow && cpNow.lastBossCleared > 0
+        ? ` Checkpoint: ${cpNow.lastBossCleared}/3 bosses cleared — facing next guardian.`
+        : (multi ? " Three milestone bosses ahead — checkpoints save on each boss win." : "");
+      appendLog(`🏰 Entered ${dungeon.name} (Rec. Gear Power: ${dungeon.recPower}).${cpNote} Choose wisely among the 3 paths in each chamber!`, "amber");
+      visitDungeonRoom(startRoom, false);
+    }
+
+    function showNoviceCheckpointModal(dungeonId, cp) {
+      const dungeon = DUNGEONS.find(d => d.id === dungeonId);
+      const bosses = getDungeonBossList(dungeon);
+      const nextIdx = Math.max(0, Math.min(bosses.length - 1, cp.lastBossCleared || 0));
+      const nextBoss = bosses[nextIdx];
+      const el = document.getElementById("noviceCheckpointModal");
+      if (!el) {
+        // Fallback if modal missing
+        if (confirm(`Resume Novice Meadows at boss ${nextIdx + 1} (${nextBoss?.name || "next"})? Cancel = Start over.`)) {
+          enterDungeon(dungeonId, { resumeChoice: "resume" });
+        } else {
+          enterDungeon(dungeonId, { resumeChoice: "restart" });
+        }
+        return;
+      }
+      document.getElementById("noviceCpDungeonName").textContent = dungeon.name;
+      document.getElementById("noviceCpProgress").textContent = `${cp.lastBossCleared} / ${bosses.length} bosses cleared this run`;
+      document.getElementById("noviceCpNextBoss").textContent = nextBoss ? nextBoss.name : "Next guardian";
+      el.dataset.dungeonId = dungeonId;
+      el.classList.remove("hidden");
     }
 
     function visitDungeonRoom(roomIdx, pushHistory = true) {
@@ -6457,13 +6588,24 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
 
     function openBossWarningModal() {
       if (!currentDungeon) return;
-      const b = currentDungeon.boss;
+      const room = dungeonGraph[currentRoomIndex];
+      const b = getBossForRoom(currentDungeon, room) || currentDungeon.boss;
+      if (!b) return;
       playSfx("danger");
       document.getElementById("bossModalName").textContent = b.name;
       document.getElementById("bossModalCategory").textContent = b.category;
       document.getElementById("bossModalHp").textContent = b.hp;
       document.getElementById("bossModalAtk").textContent = b.atk;
       document.getElementById("bossModalDef").textContent = b.def;
+      const sub = document.getElementById("bossModalSubtitle");
+      if (sub) {
+        const list = getDungeonBossList(currentDungeon);
+        if (currentDungeon.multiBoss && room && room.bossIndex != null) {
+          sub.innerHTML = `Milestone Boss ${room.bossIndex + 1} / ${list.length} • Category: <strong id="bossModalCategory" class="text-rose-300">${b.category}</strong>`;
+        } else {
+          sub.innerHTML = `Final Chamber Guardian • Category: <strong id="bossModalCategory" class="text-rose-300">${b.category}</strong>`;
+        }
+      }
       document.getElementById("bossModalAvatar").innerHTML = renderMonsterSvg({ category: b.category, color: b.color });
       document.getElementById("bossWarningModal").classList.remove("hidden");
     }
@@ -6472,7 +6614,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       if (!currentDungeon) return;
       let enemyObj = null;
       if (isBoss) {
-        const b = currentDungeon.boss;
+        const b = getBossForRoom(currentDungeon, room) || currentDungeon.boss;
         enemyObj = {
           name: b.name,
           category: b.category,
@@ -6481,7 +6623,9 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           maxHp: b.hp,
           atk: b.atk,
           def: b.def,
-          recPower: currentDungeon.recPower
+          recPower: currentDungeon.recPower,
+          bossIndex: room && room.bossIndex != null ? room.bossIndex : 0,
+          isFinalBoss: !!(room && room.isFinalBoss)
         };
       } else {
         const pool = currentDungeon.monsterPool;
@@ -6823,24 +6967,57 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         }
 
         if (combatState.isBoss) {
-          const conqueredName = currentDungeon.name;
-          stu.ClearedDungeons[currentDungeon.id] = (stu.ClearedDungeons[currentDungeon.id] || 0) + 1;
-          const effPct = Math.round(rewardEff * 100);
-          const effNote = effPct < 100
-            ? `<p class="text-xs text-amber-200 mt-2">📉 Repeat-clear reward efficiency: <strong>${effPct}%</strong> (Gold & EXP diminish 10% per prior clear of this dungeon, floor 1%). Gear drops stay full rate.</p>`
-            : `<p class="text-xs text-emerald-200 mt-2">✨ First clear reward efficiency: <strong>100%</strong>. Further clears diminish Gold & EXP by 10% each (floor 1%).</p>`;
-          showRoyalDecreeModal(
-            "🏆",
-            `${conqueredName} Conquered!`,
-            `<p class="font-bold text-emerald-300">You vanquished ${enemy.name}!</p>
-             <p class="mt-1">Earned <strong>+${totalGoldAward} Gold</strong> (including class bonus) and <strong>+${baseExp} EXP</strong> at ${effPct}% efficiency!</p>
-             ${effNote}
-             <p class="text-xs text-amber-300 mt-2">Returning to the World Map. Check the <strong>Quests & Story</strong> tab for your campaign reward!</p>`
-          );
-          // v1.1: auto-return to world map after boss victory (same as defeat)
-          currentDungeon = null;
-          document.getElementById("dungeonActiveView").classList.add("hidden");
-          document.getElementById("worldMapView").classList.remove("hidden");
+          const isFinal = !!(room && room.isFinalBoss) || !currentDungeon.multiBoss ||
+            !(Array.isArray(currentDungeon.bosses) && currentDungeon.bosses.length > 1);
+          const bossList = getDungeonBossList(currentDungeon);
+          const bossOrd = room && room.bossIndex != null ? room.bossIndex : (bossList.length - 1);
+
+          if (!isFinal) {
+            // Mid-boss milestone: checkpoint, stay in maze (no ClearedDungeons increment)
+            const clearedCount = bossOrd + 1;
+            const prev = getDungeonCheckpoint(stu, currentDungeon.id) || {};
+            setDungeonCheckpoint(stu, currentDungeon.id, {
+              lastBossCleared: clearedCount,
+              runId: prev.runId || ("run_" + Date.now().toString(36))
+            });
+            // Soft heal for starters after milestone
+            stu.currentHp = Math.min(stats.maxHp, Math.max(stu.currentHp, Math.round(stats.maxHp * 0.55)));
+            stu.currentMp = Math.min(stats.maxMana, Math.max(stu.currentMp, Math.round(stats.maxMana * 0.45)));
+            showToast(`Checkpoint saved! Boss ${clearedCount}/${bossList.length} down — press on or return later.`, "emerald");
+            appendLog(`🏁 Milestone cleared: ${enemy.name}! Checkpoint ${clearedCount}/${bossList.length}. Paths ahead reopen.`, "amber");
+            showRoyalDecreeModal(
+              "🏁",
+              `Milestone ${clearedCount}/${bossList.length} Cleared!`,
+              `<p class="font-bold text-emerald-300">You vanquished ${enemy.name}!</p>
+               <p class="mt-1">Earned <strong>+${totalGoldAward} Gold</strong> and <strong>+${baseExp} EXP</strong> (at current dungeon reward %).</p>
+               <p class="text-xs text-amber-200 mt-2">Checkpoint saved. If you fall later, you can <strong>Resume</strong> here or <strong>Start over</strong> to grind. Full-clear depreciation only applies when the final boss falls.</p>
+               <p class="text-xs text-slate-300 mt-2">Continue through the maze toward the next guardian!</p>`
+            );
+            // stay in dungeon — room.cleared already set; renderAll refreshes paths
+          } else {
+            const conqueredName = currentDungeon.name;
+            // Full run clear only (final boss) increments diminishing counter
+            stu.ClearedDungeons[currentDungeon.id] = (stu.ClearedDungeons[currentDungeon.id] || 0) + 1;
+            if (currentDungeon.multiBoss) {
+              setDungeonCheckpoint(stu, currentDungeon.id, { lastBossCleared: 0, runId: null });
+            }
+            const effPct = Math.round(rewardEff * 100);
+            const effNote = effPct < 100
+              ? `<p class="text-xs text-amber-200 mt-2">📉 Repeat-clear reward efficiency: <strong>${effPct}%</strong> (Gold & EXP diminish 10% per prior <em>full</em> clear of this dungeon, floor 1%). Gear drops stay full rate.</p>`
+              : `<p class="text-xs text-emerald-200 mt-2">✨ First full-clear reward efficiency: <strong>100%</strong>. Further full clears diminish Gold & EXP by 10% each (floor 1%).</p>`;
+            showRoyalDecreeModal(
+              "🏆",
+              `${conqueredName} Conquered!`,
+              `<p class="font-bold text-emerald-300">You vanquished ${enemy.name}!</p>
+               <p class="mt-1">Earned <strong>+${totalGoldAward} Gold</strong> (including class bonus) and <strong>+${baseExp} EXP</strong> at ${effPct}% efficiency!</p>
+               ${effNote}
+               <p class="text-xs text-amber-300 mt-2">Returning to the World Map. Check the <strong>Quests & Story</strong> tab for your campaign reward!</p>`
+            );
+            // v1.1: auto-return to world map after final boss victory
+            currentDungeon = null;
+            document.getElementById("dungeonActiveView").classList.add("hidden");
+            document.getElementById("worldMapView").classList.remove("hidden");
+          }
         }
       }
 
@@ -6881,6 +7058,11 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         const stats = computeHeroStats(stu);
         stu.currentHp = stats.maxHp;
         stu.currentMp = stats.maxMana;
+        const fellIn = currentDungeon;
+        const cp = fellIn ? getDungeonCheckpoint(stu, fellIn.id) : null;
+        const multiCpNote = (fellIn && fellIn.multiBoss && cp && cp.lastBossCleared > 0)
+          ? `<p class="text-xs text-emerald-300 mt-2">🌱 Checkpoint safe: <strong>${cp.lastBossCleared}</strong> boss(es) cleared. Re-enter to <strong>Resume</strong> at the next guardian, or <strong>Start over</strong> to grind (full-clear depreciation unchanged).</p>`
+          : `<p class="text-xs text-slate-300 mt-2">Remember: Every room you explored still granted permanent micro-stats! Upgrade your gear, repair durability at Master Grom, or earn a Social Class promotion from your teacher before diving back in.</p>`;
         currentDungeon = null;
         document.getElementById("dungeonActiveView").classList.add("hidden");
         document.getElementById("worldMapView").classList.remove("hidden");
@@ -6889,7 +7071,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           "🚑",
           "Crushed in Battle — Rescued to LS Sanctuary!",
           `<p class="text-rose-300 font-semibold">${combatState.enemy?.name || "The monster"} overwhelmed your current Gear Power!</p>
-           <p class="text-xs text-slate-300 mt-2">Remember: Every room you explored still granted permanent micro-stats! Upgrade your gear, repair durability at Master Grom, or earn a Social Class promotion from your teacher before diving back in.</p>`
+           ${multiCpNote}`
         );
       }
 
@@ -7132,7 +7314,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       const grid = document.getElementById("dungeonCardsGrid");
       const totalD = DUNGEONS.length;
       grid.innerHTML = DUNGEONS.map((d, idx) => {
-        const step = idx + 1;
+        const step = idx; // 0 = Novice Meadows … 9 = Guild Sanctum
         const powerDiff = stats.gearPower >= d.recPower;
         const clears = stu.ClearedDungeons[d.id] || 0;
         const rewardPct = Math.round(getDungeonRewardEfficiency(stu, d.id) * 100);
@@ -7143,7 +7325,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           if (stu.exploredRooms[`${d.id}_${i}`]) exploredInD++;
         }
         // Intensity climbs with ladder step (amber → rose → purple)
-        const intensity = Math.min(1, (step - 1) / Math.max(1, totalD - 1));
+        const intensity = Math.min(1, step / Math.max(1, totalD - 1));
         const borderAccent = classLocked
           ? 'border-l-slate-500'
           : (intensity < 0.35 ? 'border-l-amber-500' : intensity < 0.7 ? 'border-l-orange-500' : 'border-l-fuchsia-500');
@@ -7161,7 +7343,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           : `<button type="button" data-enter-dungeon="${d.id}" class="w-full sm:w-auto min-w-[9.5rem] px-3 py-2.5 sm:py-2 rounded-lg ${powerDiff ? 'bg-amber-500 hover:bg-amber-400 text-slate-950' : 'bg-rose-700 hover:bg-rose-600 text-white'} font-extrabold text-xs transition shadow">
                 ${powerDiff ? '⚔️ Enter Maze' : '⚠️ Enter (Deadly!)'}
               </button>`;
-        const connector = step < totalD
+        const connector = step < totalD - 1
           ? `<div class="absolute left-[1.15rem] top-full w-0.5 h-2.5 bg-gradient-to-b from-amber-500/50 to-transparent pointer-events-none z-0" aria-hidden="true"></div>`
           : '';
         return `
@@ -7185,6 +7367,8 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
                     <span>${d.roomsCount} chambers</span>
                     <span>Explored ${exploredInD}/${d.roomsCount}</span>
                     <span>Cleared ${clears}×</span>
+                    ${d.multiBoss ? `<span class="text-emerald-400/90">3-boss checkpoints</span>` : ""}
+                    ${(() => { const cp = d.multiBoss ? getDungeonCheckpoint(stu, d.id) : null; return (cp && cp.lastBossCleared > 0) ? `<span class="text-amber-300 font-semibold">CP ${cp.lastBossCleared}/3</span>` : ""; })()}
                   </div>
                 </div>
               </div>
@@ -7243,17 +7427,35 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       if (room.type === "deadend") {
         descEl.textContent = "A collapsed stone wall blocks all forward progress here! You gained Exploration micro-stats for mapping this cul-de-sac—now click Backtrack to return to the previous chamber and try a different archway.";
       } else if (room.type === "boss") {
-        descEl.textContent = `The massive iron doors of ${currentDungeon.boss.name}'s chamber stand before you!`;
+        const bHere = getBossForRoom(currentDungeon, room) || currentDungeon.boss;
+        descEl.textContent = room.cleared
+          ? `You stand victorious in ${bHere.name}'s chamber. Paths reopen toward the next trial.`
+          : `The chamber doors of ${bHere.name} stand before you!`;
       } else {
         descEl.textContent = `You stand inside ${room.name}. Three shadowy passages branch ahead—choose Left, Center, or Right to push deeper toward Chamber #${currentDungeon.roomsCount}.`;
       }
 
       const pathsContainer = document.getElementById("mazePathButtons");
-      if (room.type === "boss") {
+      if (room.type === "boss" && !room.cleared) {
+        const bFight = getBossForRoom(currentDungeon, room) || currentDungeon.boss;
+        const milestone = (currentDungeon.multiBoss && room.bossIndex != null)
+          ? ` (Boss ${room.bossIndex + 1}/${getDungeonBossList(currentDungeon).length})`
+          : "";
         pathsContainer.innerHTML = `
           <button type="button" data-open-boss-modal="1" class="col-span-3 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-orange-600 hover:from-rose-500 hover:to-orange-500 text-white font-extrabold text-sm shadow-lg">
-            ⚠️ Challenge Dungeon Boss: ${currentDungeon.boss.name}
+            ⚠️ Challenge${milestone}: ${bFight.name}
           </button>`;
+      } else if (room.type === "boss" && room.cleared && room.paths && room.paths.length) {
+        pathsContainer.innerHTML = room.paths.map((p) => {
+          return `
+            <button type="button" data-maze-target="${p.target}" class="p-3 rounded-xl bg-slate-950 hover:bg-slate-800 border border-emerald-500/40 hover:border-emerald-400 text-left transition group shadow">
+              <div class="flex items-center justify-between text-xs font-bold text-emerald-300">
+                <span>${p.icon} ${p.dir}</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-900 text-slate-300 border border-slate-700">Onward</span>
+              </div>
+              <div class="text-[11px] text-slate-300 mt-1">${p.title}</div>
+            </button>`;
+        }).join("");
       } else if (room.paths.length === 0) {
         pathsContainer.innerHTML = `<div class="col-span-3 p-3 rounded-xl bg-rose-950/50 border border-rose-500/40 text-xs text-rose-200 text-center font-semibold">🧱 Dead End! Click "Backtrack to Previous Room" below to chart the true path.</div>`;
       } else {
@@ -8201,6 +8403,23 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           startDungeonMonsterCombat(dungeonGraph[currentRoomIndex], true);
         }
       });
+
+      const noviceCpModal = document.getElementById("noviceCheckpointModal");
+      if (noviceCpModal) {
+        document.getElementById("btnNoviceResume").addEventListener("click", () => {
+          const id = noviceCpModal.dataset.dungeonId;
+          noviceCpModal.classList.add("hidden");
+          if (id) enterDungeon(id, { resumeChoice: "resume" });
+        });
+        document.getElementById("btnNoviceRestart").addEventListener("click", () => {
+          const id = noviceCpModal.dataset.dungeonId;
+          noviceCpModal.classList.add("hidden");
+          if (id) enterDungeon(id, { resumeChoice: "restart" });
+        });
+        document.getElementById("btnNoviceCpCancel").addEventListener("click", () => {
+          noviceCpModal.classList.add("hidden");
+        });
+      }
 
       document.getElementById("btnClearCombatLog").addEventListener("click", () => {
         document.getElementById("adventureLogContainer").innerHTML = "";
