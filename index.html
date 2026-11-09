@@ -2043,13 +2043,15 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
           </div>
           <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5">
             <div class="text-xs font-bold text-rose-300">⚠️ Greed &amp; Defeat Penalty</div>
-            <p class="text-xs text-slate-300 mt-1">If you are defeated between safety nets (e.g., Stage 13), you are knocked back to your previous Safety Net (Stage 10), lose unbanked training gains, and suffer a <strong>-2% to -5% base stat penalty</strong>!</p>
+            <p class="text-xs text-slate-300 mt-1">If you are defeated between safety nets (e.g., Stage 13), you are knocked back to your previous Safety Net (Stage 10), <strong>lose all unbanked gains</strong>, take a <strong>−6% to −10% base-stat multiplier</strong> (floor <strong>55%</strong>), and burn a matching % of your <strong>banked portal bonus stats</strong>. Cash out recovers +1.5% of the multiplier each time.</p>
           </div>
           <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5">
             <div class="text-xs font-bold text-emerald-300">♻️ Cash Out &amp; 10% Repeat Decay</div>
             <p class="text-xs text-slate-300 mt-1">Exiting the portal banks your accumulated stats and resets your stage to <strong>Stage 1</strong>. Each repeat clear on the same stage reduces its training effect by <strong>10%</strong> (down to a minimum floor of <strong>10%</strong>).</p>
           </div>
         </div>
+
+        <div id="portalPenaltyBanner" class="hidden rounded-xl border-2 border-rose-500/60 bg-rose-950/70 px-3.5 py-2.5 text-sm font-extrabold text-rose-200 shadow-lg"></div>
 
         <!-- Active Run Unbanked Rewards & Controls -->
         <div class="bg-slate-950/90 border border-indigo-500/40 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
@@ -6840,10 +6842,11 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       if (!stu) return;
       const stage = stu.portalState.currentStage || 1;
       const mBase = MONSTERS[(stage - 1) % MONSTERS.length];
-      const scale = Math.pow(1.095, stage - 1);
-      const hp = Math.round(70 * scale + stage * 22);
-      const atk = Math.round(13 * scale + stage * 3.5);
-      const def = Math.round(6 * scale + stage * 2.0);
+      const scale = Math.pow(1.125, stage - 1);
+      const bossSpike = (stage % 5 === 0) ? 1.28 : 1.0;
+      const hp  = Math.round((95 * scale + stage * 38) * bossSpike);
+      const atk = Math.round((18 * scale + stage * 5.5) * bossSpike);
+      const def = Math.round((9 * scale + stage * 3.2) * bossSpike);
 
       combatState = {
         active: true,
@@ -6859,7 +6862,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
           maxHp: hp,
           atk: atk,
           def: def,
-          recPower: Math.round(100 * scale)
+          recPower: Math.round(140 * scale * bossSpike)
         },
         buffs: { atkTurns: 0, defTurns: 0 }
       };
@@ -6888,7 +6891,7 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       stu.gold += u.gold;
 
       if (stu.portalPenaltyMult < 1.0) {
-        stu.portalPenaltyMult = Math.min(1.0, +(stu.portalPenaltyMult + 0.01).toFixed(3));
+        stu.portalPenaltyMult = Math.min(1.0, +(stu.portalPenaltyMult + 0.015).toFixed(3));
       }
 
       showRoyalDecreeModal(
@@ -7091,11 +7094,11 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         const efficiency = Math.max(0.10, +(1.0 - prevClears * 0.10).toFixed(2));
         ps.stageClearCounts[stg] = prevClears + 1;
 
-        const gainMp  = Math.max(1, Math.round((2 + Math.floor(stg / 4)) * efficiency));
-        const gainAtk = Math.max(1, Math.round((1 + Math.floor(stg / 6)) * efficiency));
-        const gainDef = Math.max(1, Math.round((1 + Math.floor(stg / 6)) * efficiency));
-        const gainHp  = Math.max(2, Math.round((6 + stg) * efficiency));
-        const gainGold = Math.max(5, Math.round((15 + stg * 6) * efficiency));
+        const gainMp  = Math.max(1, Math.round((1 + Math.floor(stg / 7)) * efficiency));
+        const gainAtk = Math.max(1, Math.round((1 + Math.floor(stg / 10)) * efficiency));
+        const gainDef = Math.max(1, Math.round((1 + Math.floor(stg / 10)) * efficiency));
+        const gainHp  = Math.max(2, Math.round((3 + Math.floor(stg * 0.55)) * efficiency));
+        const gainGold = Math.max(4, Math.round((8 + stg * 3.5) * efficiency));
 
         ps.unbanked.mp   += gainMp;
         ps.unbanked.atk  += gainAtk;
@@ -7206,8 +7209,20 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         const ps = stu.portalState;
         const failedStage = ps.currentStage;
         const knockbackStage = Math.max(1, ps.safetyNetStage || 1);
-        const penaltyPct = Math.floor(Math.random() * 4) + 2;
-        stu.portalPenaltyMult = Math.max(0.70, +(stu.portalPenaltyMult * (1 - penaltyPct / 100)).toFixed(3));
+        const penaltyPct = Math.floor(Math.random() * 5) + 6; // 6–10%
+        stu.portalPenaltyMult = Math.max(0.55, +(stu.portalPenaltyMult * (1 - penaltyPct / 100)).toFixed(3));
+
+        // Burn a matching % of already-banked portal bonus stats (never below 0)
+        const bs = stu.bonusStats || (stu.bonusStats = { hp: 0, atk: 0, def: 0, mp: 0 });
+        const burnHp  = Math.ceil((bs.hp  || 0) * (penaltyPct / 100));
+        const burnAtk = Math.ceil((bs.atk || 0) * (penaltyPct / 100));
+        const burnDef = Math.ceil((bs.def || 0) * (penaltyPct / 100));
+        const burnMp  = Math.ceil((bs.mp  || 0) * (penaltyPct / 100));
+        bs.hp  = Math.max(0, (bs.hp  || 0) - burnHp);
+        bs.atk = Math.max(0, (bs.atk || 0) - burnAtk);
+        bs.def = Math.max(0, (bs.def || 0) - burnDef);
+        bs.mp  = Math.max(0, (bs.mp  || 0) - burnMp);
+
         ps.currentStage = knockbackStage;
         ps.unbanked = { hp: 0, atk: 0, def: 0, mp: 0, gold: 0 };
 
@@ -7215,14 +7230,18 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
         stu.currentHp = Math.round(stats.maxHp * 0.5);
         stu.currentMp = Math.round(stats.maxMana * 0.5);
 
+        const activePct = Math.round((stu.portalPenaltyMult || 1) * 100);
+        showToast(`💀 Portal penalty! Stats cut to ${activePct}%`, "rose");
         showRoyalDecreeModal(
           "💀",
           `Defeated on Portal Stage ${failedStage}!`,
-          `<p class="text-rose-300 font-semibold">You pushed past the Safety Net and fell in battle!</p>
+          `<p class="text-rose-400 font-extrabold text-base sm:text-lg">⚠️ ACTIVE PENALTY: base stats now at ${activePct}%</p>
+           <p class="text-rose-300 font-semibold mt-1">You pushed past the Safety Net and fell in battle!</p>
            <ul class="text-left text-xs space-y-1 mt-2 bg-slate-900 p-3 rounded-lg border border-rose-500/40">
              <li>• Knocked back to Safety Net: <strong>Stage ${knockbackStage}</strong></li>
              <li>• Unbanked run rewards lost</li>
-             <li>• Suffered a <strong>-${penaltyPct}% Base Stat Penalty</strong> (Grind dungeons or cash out portal stages to recover!)</li>
+             <li>• Base-stat multiplier cut by <strong>−${penaltyPct}%</strong> (floor 55%; cash out recovers +1.5% each time)</li>
+             <li>• Banked portal bonus burned: <strong>−${burnHp} HP · −${burnAtk} ATK · −${burnDef} DEF · −${burnMp} MP</strong></li>
            </ul>`
         );
         switchTab("portal");
@@ -7998,8 +8017,29 @@ Marcus, M" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 
       const u = ps.unbanked;
       document.getElementById("portalUnbankedStats").textContent =
         `+${u.mp} Magic Power • +${u.atk} ATK • +${u.def} DEF • +${u.hp} Max HP • +${u.gold} Gold`;
-      document.getElementById("portalCurrentStageEfficiency").textContent =
-        `Stage ${stg} Repeat Clears: ${clears} • Training Effect Efficiency: ${eff}% (Min 10%) • Penalty Mult: ${Math.round((stu.portalPenaltyMult || 1) * 100)}%`;
+
+      const penMult = stu.portalPenaltyMult || 1;
+      const penPct = Math.round(penMult * 100);
+      const effEl = document.getElementById("portalCurrentStageEfficiency");
+      const penSpan = penMult < 1
+        ? `<span class="text-rose-400 font-extrabold">Penalty Mult: ${penPct}%</span>`
+        : `Penalty Mult: ${penPct}%`;
+      effEl.innerHTML =
+        `Stage ${stg} Repeat Clears: ${clears} • Training Effect Efficiency: ${eff}% (Min 10%) • ${penSpan}`;
+      effEl.className = penMult < 1
+        ? "text-xs text-rose-300 font-bold"
+        : "text-xs text-indigo-300";
+
+      const banner = document.getElementById("portalPenaltyBanner");
+      if (banner) {
+        if (penMult < 1) {
+          banner.classList.remove("hidden");
+          banner.textContent = `⚠️ TRAINING PENALTY ACTIVE — Base stats at ${penPct}% (cash out clears to recover +1.5% each time)`;
+        } else {
+          banner.classList.add("hidden");
+          banner.textContent = "";
+        }
+      }
 
       const grid = document.getElementById("portalStageGrid");
       let html = "";
